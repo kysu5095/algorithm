@@ -1,5 +1,4 @@
 // 임계경로
-// 2:40
 
 #include <iostream>
 #include <algorithm>
