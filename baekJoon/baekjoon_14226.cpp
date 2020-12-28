@@ -1,5 +1,4 @@
 // 이모티콘
-// 3:20
 
 #include <iostream>
 #include <queue>
