@@ -1,5 +1,4 @@
 // 미로 탈출
-// 4:05
 
 #include <iostream>
 #include <queue>
