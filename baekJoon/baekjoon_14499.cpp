@@ -1,5 +1,4 @@
 // 주사위 굴리기 //
-//////////////////
 
 #include <iostream>
 #include <algorithm>
