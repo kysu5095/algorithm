@@ -1,5 +1,4 @@
 // 탈옥
-// 1:10
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
@@ -55,7 +54,7 @@ int meet_each() {
 	int val = INT_MAX;
 	for (int i = 0; i <= h + 1; i++) {
 		for (int j = 0; j <= w + 1; j++) {
-			if (arr[i][j] == '*') continue;
+			if (arr[i][j] == '*' || (!visited[i][j][0] && !visited[i][j][1] && !visited[i][j][2])) continue;
 			if (arr[i][j] == '#')
 				map[i][j] -= 2;
 			if (val > map[i][j])
