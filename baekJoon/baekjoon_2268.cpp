@@ -18,9 +18,9 @@ ll query(int node, int left, int right, int& start, int& last) {
 	if (left > last || right < start) return 0;
 	if (left >= start && right <= last) return tree[node];
 	int next = node << 1;
-	int mid  = (left + right) >> 1;
+	int mid = (left + right) >> 1;
 	return query(next, left, mid, start, last) +
-		   query(next + 1, mid + 1, last, start, last);
+		query(next + 1, mid + 1, right, start, last);
 }
 
 /*
