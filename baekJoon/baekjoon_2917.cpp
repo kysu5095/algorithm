@@ -1,61 +1,72 @@
 // 늑대 사냥꾼
 
-#define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <string.h>
 #include <algorithm>
-#include <math.h>
-#include <limits.h>
 
 using namespace std;
 
-int n, m, sy, sx, res;
+int n, m, sy, sx;
 char arr[501][501];
+int dist[501][501];
 bool visited[501][501];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
 vector<pair<int, int>> v;
 
-bool promising(int& y, int& x, int& dis) {
-	for (auto idx : v) 
-		if (abs(y - idx.first) + abs(x - idx.second) < dis)
-			return false;
-
-	return true;
-}
-
-bool bfs(int& dis) {
-	memset(visited, false, sizeof(visited));
-	queue<pair<int, int>> q;
-	q.push(make_pair(sy, sx));
-	visited[sy][sx] = true;
-	int y, x, ny, nx;
+int bfs() {
+	priority_queue<pair<int, pair<int, int>>> q;
+	q.push(make_pair(dist[sy][sx], make_pair(sy, sx)));
+	int y, x, ny, nx, val;
 	while (!q.empty()) {
-		y = q.front().first;
-		x = q.front().second;
+		y = q.top().second.first;
+		x = q.top().second.second;
+		val = q.top().first;
 		q.pop();
+		if (visited[y][x]) continue;
+		visited[y][x] = true;
 		for (int i = 0; i < 4; i++) {
 			ny = y + dy[i];
 			nx = x + dx[i];
 			if (ny < 0 || ny == n || nx < 0 || nx == m || visited[ny][nx]) continue;
-			if (arr[ny][nx] == 'J') return true;
-			if (!promising(ny, nx, dis)) continue;
-			q.push(make_pair(ny, nx));
-			visited[ny][nx] = true;
+			if (arr[ny][nx] == '+') continue;
+			if (arr[ny][nx] == 'J') return val;
+			q.push(make_pair(min(val, dist[ny][nx]), make_pair(ny, nx)));
 		}
 	}
 	return false;
 }
 
+void get_dis() {
+	queue<pair<int, int>> q;
+	for (auto idx : v) 
+		q.push(make_pair(idx.first, idx.second));
+
+	int y, x, ny, nx, len;
+	while (!q.empty()) {
+		len = q.size();
+		while (len--) {
+			y = q.front().first;
+			x = q.front().second;
+			q.pop();
+			for (int i = 0; i < 4; i++) {
+				ny = y + dy[i];
+				nx = x + dx[i];
+				if (ny < 0 || ny == n || nx < 0 || nx == m || arr[ny][nx] == '+') continue;
+				if (dist[ny][nx]) continue;
+				q.push(make_pair(ny, nx));
+				dist[ny][nx] = dist[y][x] + 1;
+			}
+		}
+	}
+}
+
 int main() {
 	cin.sync_with_stdio(0);
 	cin.tie(0);
-	int left = INT_MAX;
-	int right = 0;
-	int mid;
-	freopen("vuk.in.3", "r", stdin);
+	//freopen("vuk.in.6", "r", stdin);
 	cin >> n >> m;
 	for (int i = 0; i < n; i++) {
 		cin >> arr[i];
@@ -68,19 +79,9 @@ int main() {
 				v.push_back(make_pair(i, j));
 		}
 	}
-	for (auto idx : v) {
-		left = min(left, abs(sy - idx.first) + abs(sx - idx.second));
-		right = max(right, abs(sy - idx.first) + abs(sx - idx.second));
-	}
-	while (left <= right) {
-		mid = (left + right) >> 1;
-		if (bfs(mid)) {
-			left = mid + 1;
-			res = mid;
-		}
-		else right = mid - 1;
-	}
+	get_dis();
+	int res = bfs();
 	cout << res << '\n';
-	fclose(stdin);
+	//fclose(stdin);
 	return 0;
 }
