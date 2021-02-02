@@ -1,179 +1,121 @@
 // 묘수풀이: 모독
 
 #include <iostream>
-#include <algorithm>
+#include <string.h>
 
 using namespace std;
 
-int n, m, cnt = 0;
-int arr[2][8][2];
-int order[9], turn[8];
-bool visited[8] = { false, };
+int n, m;
 bool finish = false;
+int arr[2][7][2];  // ATTACK, HP
+int sequence[7];
+int attack[8];
+bool visited[7];
 
-void modok() {
-	bool judge = true;
-	while (judge) {
-		judge = false;
-		for (int i = 1; i <= n; i++) {
-			arr[0][i][1]--;
-			if (arr[0][i][1]== 0) {
-				judge = true;
-			}
-		}
-		for (int i = 1; i <= m; i++) {
-			arr[1][i][1]--;
-			if (arr[1][i][1]== 0) {
-				judge = true;
-			}
-		}
+void COPY_ARR(int tmp[][7], bool flag){
+	if(flag){
+		for(int i = 0; i < n; i++) tmp[0][i] = arr[0][i][1];
+		for(int i = 0; i < m; i++) tmp[1][i] = arr[1][i][1];
+	}
+	else{
+		for(int i = 0; i < n; i++) arr[0][i][1] = tmp[0][i];
+		for(int i = 0; i < m; i++) arr[1][i][1] = tmp[1][i];
 	}
 }
 
-bool promising() {
-	bool judge = true;
-	for (int i = 1; i <= n; i++)
-		if (arr[0][i][1] > 0) judge = false;
-	for (int i = 1; i <= m; i++)
-		if (arr[1][i][1] > 0) judge = false;
-
-	return judge;
-}
-
-void print(int flag) {
-	int cnt = 0;
-	for (int i = 1; i <= n; i++)
-		if (order[i])
-			cnt++;
-	if (flag) cnt++;
+void LOG(int modok){
+	int cnt;
+	if(modok >= 0) cnt = 1;
+	else cnt = 0;
+	for(int i = 0; i < n; i++)
+		if(attack[i] != -1) cnt++;
 	cout << cnt << '\n';
 
-	if (flag) {
-		if (flag == n + 1) {
-			for (int i = 1; i <= n; i++)
-				if (order[i])
-					cout << "attack " << i << " " << order[i] << '\n';
-			cout << "use modok\n";
-		}
-		else {
-			for (int i = 1; i <= n; i++) {
-				if(i == flag)
-					cout << "use modok\n";
-				else {
-					if(order[i])
-						cout << "attack " << i << " " << order[i] << '\n';
-				}
-			}
-		}
-	}
-	else {
-		for (int i = 1; i <= n; i++)
-			if (order[i])
-				cout << "attack " << i << " " << order[i] << '\n';
+	for(int i = 0; i < n; i++){
+		if(i == modok) cout << "use modok\n";
+		if(attack[i] != -1) cout << "attack " << sequence[i] << " " << attack[i] << '\n';
 	}
 }
 
-void dfs(int cnt, int flag) {
-	if (finish) return;
-	if (cnt == n + 1) {
-		/*int tmp[2][8];
-		for (int i = 1; i <= n; i++) tmp[0][i] = arr[0][i][1];
-		for (int i = 1; i <= m; i++) tmp[1][i] = arr[1][i][1];
-		if (flag == 0) {
-			if (promising()) {
-				finish = true;
-				print(0);
-				return;
-			}
-			modok();
-			if (promising()) {
-				finish = true;
-				print(cnt);
-				return;
-			}
-			for (int i = 1; i <= n; i++) arr[0][i][1] = tmp[0][i];
-			for (int i = 1; i <= m; i++) arr[1][i][1] = tmp[1][i];
-		}
-		if (promising()) {
-			finish = true;
-			print(flag);
-		}*/
-		for (int i = 1; i <= n; i++) {
-			int AK_1 = arr[0][turn[i]][0];
-			int AK_2 = arr[1][order[turn[i]]][0];
-			int HP_1 = arr[0][turn[i]][1];
-			int HP_2 = arr[1][order[turn[i]]][1];
-			if (HP_1 <= 0 || HP_2 <= 0 || (AK_1 >= HP_2 && AK_2 >= HP_1)) return;
-		}
-		return;
-	}
-	for (int i = 0; i <= m; i++) {
-		if (i == 0) {
-			order[turn[cnt]] = 0;
-			dfs(cnt + 1, flag);
-			continue;
-		}
-		/*if (flag == 0) {
-			int tmp[2][8];
-			for (int i = 1; i <= n; i++) tmp[0][i] = arr[0][i][1];
-			for (int i = 1; i <= m; i++) tmp[1][i] = arr[1][i][1];
-			modok();
-			dfs(cnt, cnt);
-			for (int i = 1; i <= n; i++) arr[0][i][1] = tmp[0][i];
-			for (int i = 1; i <= m; i++) arr[1][i][1] = tmp[1][i];
-			return;
-		}*/
-		order[turn[cnt]] = i;
-		dfs(cnt + 1, flag);
-		order[turn[cnt]] = 0;
-		/*int AK_1 = arr[0][turn[cnt]][0];
-		int AK_2 = arr[1][i][0];
-		int HP_1 = arr[0][turn[cnt]][1];
-		int HP_2 = arr[1][i][1];
-		if (HP_1 <= 0 || HP_2 <= 0 || (AK_1 >= HP_2 && AK_2 >= HP_1)) {
-			order[turn[cnt]] = 0;
-			continue;
-		}
-		else {
-			order[turn[cnt]] = i;
-			arr[0][turn[cnt]][1] -= AK_2;
-			arr[1][i][1] -= AK_1;
-			dfs(cnt + 1, flag);
-			order[turn[cnt]] = 0;
-			arr[0][turn[cnt]][1] += AK_2;
-			arr[1][i][1] += AK_1;
-		}*/
+bool PROMISING(){
+	bool flag = true;
+	for(int i = 0; i < m; i++)
+		if(arr[1][i][1] > 0) flag = false;
+		
+	return flag;
+}
+
+void MODOK(){
+	bool flag = true;
+	while(flag){
+		flag = false;
+		for(int i = 0; i < n; i++)
+			if(--arr[0][i][1] == 0) flag = true;
+		for(int i = 0; i < m; i++)
+			if(--arr[1][i][1] == 0) flag = true;
 	}
 }
 
-void sequence(int cnt) {
-	if (finish) return;
-	if (cnt == n + 1) {
-		dfs(1, 0);
+void DFS(int _idx, int modok){
+	if(finish) return;
+	if(_idx == n){
+		if(PROMISING()){
+			LOG(modok);	
+		}	
 		return;
 	}
-	for (int i = 1; i <= n; i++) {
-		if (!visited[i]) {
+	int tmp_arr[2][7];
+	if(modok == -1){
+		COPY_ARR(tmp_arr, true);
+		MODOK();
+		DFS(_idx, _idx);
+		COPY_ARR(tmp_arr, false);
+	}
+	int idx = sequence[_idx];
+	for(int i = 0; i < m; i++){
+		if(arr[0][idx][1] > 0 && arr[1][i][1] > 0){
+			attack[_idx] = i;
+			arr[0][idx][1] -= arr[1][i][0];
+			arr[1][i][1] -= arr[0][idx][0];
+			DFS(idx + 1, modok);
+			arr[0][idx][1] += arr[1][i][0];
+			arr[1][i][1] += arr[0][idx][0];
+		}
+	}
+	attack[_idx] = -1;
+	DFS(idx + 1, modok);
+}
+
+void SEQUENCE(int idx){
+	if(finish) return;
+	if(idx == n){
+		DFS(0, -1);
+		return;
+	}
+	for(int i = 0; i < n; i++){
+		if(!visited[i]){
 			visited[i] = true;
-			turn[cnt] = i;
-			sequence(cnt + 1);
+			sequence[idx] = i;
+			SEQUENCE(idx + 1);
 			visited[i] = false;
 		}
 	}
 }
 
-int main() {
+int main(){
 	cin.sync_with_stdio(0);
 	cin.tie(0);
 	cin >> n >> m;
-	for (int i = 1; i <= n; i++)
+	for(int i = 0; i < n; i++)
 		cin >> arr[0][i][0] >> arr[0][i][1];
-	for (int i = 1; i <= m; i++)
+	for(int i = 0; i < m; i++)
 		cin >> arr[1][i][0] >> arr[1][i][1];
-	if (!n || !m) cout << "0\n";
+	memset(attack, -1, sizeof(attack));
+	if(!n || !m) cout << "0\n";
 	else {
-		sequence(1);
-		if (!finish) cout << "-1\n";
+		SEQUENCE(0);
+		if(!finish)
+			cout << "-1\n";
 	}
 	return 0;
 }
