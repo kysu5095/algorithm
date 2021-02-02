@@ -61,6 +61,7 @@ void DFS(int _idx, int modok){
 	if(_idx == n){
 		if(PROMISING()){
 			LOG(modok);	
+			finish = true;
 		}	
 		return;
 	}
