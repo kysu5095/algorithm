@@ -1,97 +1,105 @@
 // 통나무 옮기기
-// 7:35
 
 #include <iostream>
 #include <queue>
 
 using namespace std;
 
-int n, res;
+int n;
 char arr[51][51];
-bool visited[51][51][2] = { { {false, } , }, };
+bool visited[2][51][51] = { { {false, }, }, };
+int dy[8] = { 0, 0, 1, -1, -1, -1, 1, 1 };
+int dx[8] = { 1, -1, 0, 0, -1, 1, 1, -1 };
 
-class Point {
-public:
-	int y, x, d;
-};
-Point p[8] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {-1, 1}, {1, 1}, {1, -1}, {-1, -1} };
-Point tree[3];
+bool isRight(int y, int x, int& d) {
+	if (visited[d][y][x]) return false;
+	if (!d) {
+		x--;
+		for (int i = 0; i < 3; i++) {
+			if (y < 0 || y == n || x < 0 || x == n || arr[y][x] == '1') return false;
+			x++;
+		}
+	}
+	else {
+		y--;
+		for (int i = 0; i < 3; i++) {
+			if (y < 0 || y == n || x < 0 || x == n || arr[y][x] == '1') return false;
+			y++;
+		}
+	}
+	return true;
+}
 
-// d = 0 (가로)    
-// d = 1 (세로)
-int bfs(int direction) {
-	queue<Point> q;
-	q.push({ tree[1].y, tree[1].x, direction });
-	visited[tree[1].y][tree[1].x][direction] = true;
+int bfs(pair<int, int>& B_pair, int& B_d, int& E_d) {
+	queue<pair<int, pair<int, int>>> q;
+	q.push(make_pair(B_d, make_pair(B_pair.first, B_pair.second)));
+	visited[B_d][B_pair.first][B_pair.second] = true;
+
 	int y, x, ny, nx, d, len, t = 0;
-	int y1, x1, y2, x2, ny1, nx1, ny2, nx2;
 	bool flag;
 	while (!q.empty()) {
 		len = q.size();
 		while (len--) {
-			y = q.front().y;
-			x = q.front().x;
-			d = q.front().d;
+			y = q.front().second.first;
+			x = q.front().second.second;
+			d = q.front().first;
 			q.pop();
-			if (d) {
-				y1 = y - 1, x1 = x;
-				y2 = y + 1, x2 = x;
-			}
-			else {
-				y1 = y, x1 = x - 1;
-				y2 = y, x2 = x + 1;
-			}
-			if (arr[y][x] == 'E' && arr[y1][x1] == 'E' && arr[y2][x2] == 'E')
-				return t;
+			if (arr[y][x] == 'E' && d == E_d) return t;
 			
 			for (int i = 0; i < 4; i++) {
-				ny = y + p[i].y;
-				nx = x + p[i].x;
-				ny1 = y1 + p[i].y;
-				nx1 = x1 + p[i].x;
-				ny2 = y2 + p[i].y;
-				nx2 = x2 + p[i].x;
-				if (ny >= 0 && ny < n && nx >= 0 && nx < n && ny1 >= 0 && ny1 < n && nx1 >= 0 && nx1 < n && ny2 >= 0 && ny2 < n && nx2 >= 0 && nx2 < n) {
-					if (!visited[ny][nx][d] && arr[ny][nx] != '1' && arr[ny1][nx1] != '1' && arr[ny2][nx2] != '1') {
-						visited[ny][nx][d] = true;
-						q.push({ ny, nx, d });
-					}
-				}
+				ny = y + dy[i];
+				nx = x + dx[i];
+				if (!isRight(ny, nx, d)) continue;
+				q.push(make_pair(d, make_pair(ny, nx)));
+				visited[d][ny][nx] = true;
 			}
+
+			if (visited[d ^ 1][y][x]) continue;
 			flag = true;
 			for (int i = 0; i < 8; i++) {
-				ny = y + p[i].y;
-				nx = x + p[i].x;
-				if (!(ny >= 0 && ny < n && nx >= 0 && nx < n && arr[ny][nx] != '1')) {
+				ny = y + dy[i];
+				nx = x + dx[i];
+				if (ny < 0 || ny == n || nx < 0 || nx == n || arr[ny][nx] == '1') {
 					flag = false;
 					break;
 				}
 			}
-			if (flag && !visited[y][x][!d]) {
-				visited[y][x][!d] = true;
-				q.push({ y, x, !d });
-			}
+			if (!flag) continue;
+			q.push(make_pair(d ^ 1, make_pair(y, x)));
+			visited[d ^ 1][y][x] = true;
 		}
 		t++;
 	}
+
 	return 0;
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	int d, idx = 0;
+	cin.sync_with_stdio(0);
+	cin.tie(0);
+	pair<int, int> B[3], E[3];
+	int B_idx = 0, E_idx = 0;
 	cin >> n;
 	for (int i = 0; i < n; i++) {
+		cin >> arr[i];
 		for (int j = 0; j < n; j++) {
-			cin >> arr[i][j];
-			if (arr[i][j] == 'B')
-				tree[idx++] = { i, j };
+			if (arr[i][j] == 'B') {
+				B[B_idx++] = make_pair(i, j);
+				arr[i][j] = '0';
+			}
+			else if (arr[i][j] == 'E') {
+				E[E_idx++] = make_pair(i, j);
+				arr[i][j] = '0';
+			}
 		}
 	}
-	if (tree[0].y + 1 == tree[1].y) d = 1;
-	else d = 0;
-	res = bfs(d);
-	cout << res << '\n';
+	int B_d, E_d;
+	if (B[0].first == B[1].first) B_d = 0;
+	else B_d = 1;
+	if (E[0].first == E[1].first) E_d = 0;
+	else E_d = 1;
+	arr[E[1].first][E[1].second] = 'E';
+
+	cout << bfs(B[1], B_d, E_d) << '\n';
 	return 0;
 }
