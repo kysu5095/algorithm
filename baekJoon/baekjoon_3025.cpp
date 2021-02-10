@@ -1,78 +1,74 @@
-// 돌 던지기
+// 돌 던지기 
 
 #include <iostream>
+#include <set>
+
+int r, c;
+char arr[30001][31];
+set<int> s[31];
 
 using namespace std;
 
-int r, c, n;
-char arr[30001][31];
-int top[30001][31];
-
-bool is_left_right(int& y, int& x) {
-	if (x - 1 < 0 || arr[y][x - 1] != '.' || arr[y + 1][x - 1] != '.') return false;
-	return true;
+void print(){
+	for(int i = 0; i < r; i++)
+		cout << arr[i] << '\n';
 }
 
-bool is_right_right(int& y, int& x) {
-	if (x + 1 == c || arr[y][x + 1] != '.' || arr[y + 1][x + 1] != '.') return false;
-	return true;
-}
-
-void throw_stone(int x) {
-	int y = top[0][x] - 1;
-	int exist = y;
-	while (true) {
-		if (y == r - 1 || arr[y + 1][x] == 'X') break;
-		if (arr[y + 1][x] == '.') { y++; break; }
-		else {
-			if (is_left_right(y, x)) {
-				x--;
-				y = top[y][x] - 1;
-				exist = y;
-			}
-			else if (is_right_right(y, x)) {
-				x++;
-				y = top[y][x] - 1;
-				exist = y;
-			}
-			else
-				break;
+void throw_stone(int x){
+	int cur_y = 0, y = 0;
+	set<int>::iterator iter;
+	while(true){
+		if(s[x].empty()){
+			arr[r-1][x] = 'O';
+			s[x].insert(r-1);
+			break;
 		}
-	}
-	arr[y][x] = 'O';
-	for (int i = y; i >= 0; i--) {
-		if (top[i][x] != exist + 1) break;
-		top[i][x] = y;
+		for(iter = s[x].begin(); iter != s[x].end(); iter++){
+			cur_y = *iter;
+			if(cur_y <= y) continue;
+			y = cur_y;
+			break;
+		}
+		if(iter == s[x].end()){
+			arr[r-1][x] = 'O';
+			s[x].insert(r-1);
+			break;
+		}
+		if(arr[y][x] == 'X'){
+			arr[y-1][x] = 'O';
+			s[x].insert(y-1);
+			break;
+		}
+		if(x > 0 && arr[y][x-1] == '.' && arr[y+1][x-1] == '.'){
+			x--;
+			continue;
+		}
+		if(x < c-1 && arr[y][x+1] == '.' && arr[y+1][x+1] == '.'){
+			x++;
+			continue;
+		}
+		arr[y-1][x] = 'O';
+		s[x].insert(y-1);
+		break;
 	}
 }
 
-int main() {
+int main(){
 	cin.sync_with_stdio(0);
 	cin.tie(0);
-	int x;
 	cin >> r >> c;
-	for (int i = 0; i < r; i++) 
-		for (int j = 0; j < c; j++)
-			top[i][j] = r - 1;
-
-	for (int i = 0; i < r; i++) {
+	for(int i = 0; i < r; i++){
 		cin >> arr[i];
-		for (int j = 0; j < c; j++)
-			if (arr[i][j] == 'X') 
-				for (int k = i; k >= 0; k--)
-					top[k][j] = i;
+		for(int j = 0; j < c; j++)
+			if(arr[i][j] == 'X')
+				s[j].insert(i);
 	}
-	cin >> n;
-	while (n--) {
-		cin >> x;
-		throw_stone(x - 1);
+	int t, col;
+	cin >> t;
+	while(t--){
+		cin >> col;
+		throw_stone(col);
 	}
-	for (int i = 0; i < r; i++) {
-		for (int j = 0; j < c; j++) {
-			cout << arr[i][j];
-		}
-		cout << '\n';
-	}
-
+	print();
 	return 0;
 }
