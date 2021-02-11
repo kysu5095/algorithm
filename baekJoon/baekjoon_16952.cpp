@@ -49,6 +49,7 @@ void bfs() {
 						if (arr[ny][nx] == n * n) v.push_back(change);
 						else {
 							if (!visited[horse][target + 1][ny][nx]) {
+								visited[horse][target][ny][nx] = true;
 								visited[horse][target + 1][ny][nx] = true;
 								q.push(make_pair(make_pair(change, horse), make_pair(target + 1, make_pair(ny, nx))));
 							}
