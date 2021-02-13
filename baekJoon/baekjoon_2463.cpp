@@ -25,14 +25,6 @@ int Find(int x){
     return parent[x] = Find(parent[x]);
 }
 
-void Union(int y, int x){
-    y = Find(y);
-    x = Find(x);
-    if(y == x) return;
-    if(y > x) parent[y] = x;
-    else parent[x] =y;
-}
-
 int main(){
     cin.sync_with_stdio(0);
     cin.tie(0);
@@ -47,19 +39,17 @@ int main(){
     Init();
     ll res = 0;
     while(!pq.empty()){
-        y = pq.top().second.first;
-        x = pq.top().second.second;
-        w = pq.top().first;
-        pq.pop();
-        y = Find(y);
-        x = Find(x);
+        const pair<int, pair<int, int>>& node = pq.top();
+        y = Find(node.second.first);
+        x = Find(node.second.second);
         if(y != x){
-            res += (((count[y] * count[x]) % MOD) * total) % MOD;
+            res += (((1L *count[y] * count[x]) % MOD) * total) % MOD;
             res %= MOD;
             parent[y] = x;
             count[x] += count[y];
         }
-        total -= w;
+        total -= node.first;
+        pq.pop();
     }
     cout << res << '\n';
     return 0;
