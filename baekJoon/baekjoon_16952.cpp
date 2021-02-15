@@ -107,3 +107,124 @@ int main() {
 	bfs();
 	return 0;
 }
+
+// 정답 소스
+// #include <iostream>
+// #include <algorithm>
+
+// #define valid(y, x) ((y) > 0 && (y) <= n && (x) > 0 && (x) <= n)
+// using namespace std;
+// typedef pair<int, int> pii;
+// constexpr int INF = 0x3f3f3f3f;
+
+// int a[12][12];
+// int min_cost[301][301];
+// int min_change[301][301];
+// int dp1[3][101];
+// int dp2[3][301];
+// int dy[] = { 2, 1, -1, -2, -2, -1, 1, 2 };
+// int dx[] = { 1, 2, 2, 1, -1, -2, -2, -1 };
+// int cy[] = { 1, -1, -1, 1 };
+// int cx[] = { 1, -1, 1, -1 };
+// int by[] = { 1, 0, 0, -1 };
+// int bx[] = { 0, 1, -1, 0 };
+// int n;
+
+// int main() {
+// 	ios_base::sync_with_stdio(false);
+// 	cin.tie(nullptr);
+
+// 	cin >> n;
+// 	memset(min_cost, INF, sizeof(min_cost));
+// 	memset(min_change, INF, sizeof(min_change));
+// 	memset(dp1, INF, sizeof(dp1));
+// 	for (int i = 1; i <= n; ++i) {
+// 		for (int j = 1; j <= n; ++j) {
+// 			cin >> a[i][j];
+// 		}
+// 	}
+
+// 	for (int i = 1; i <= n; ++i) {
+// 		for (int j = 1; j <= n; ++j) {
+// 			int y, x;
+// 			for (int k = 8; k--;) {
+// 				y = i + dy[k], x = j + dx[k];
+// 				if (!valid(y, x)) continue;
+
+// 				min_cost[a[i][j]][a[y][x]] = 1;
+// 				min_change[a[i][j]][a[y][x]] = 0;
+// 			}
+
+// 			for (int k = 4; k--;) {
+// 				y = i + cy[k], x = j + cx[k];
+// 				while (valid(y, x)) {
+// 					min_cost[a[i][j] + 100][a[y][x] + 100] = 1;
+// 					min_change[a[i][j] + 100][a[y][x] + 100] = 0;
+// 					y += cy[k], x += cx[k];
+// 				}
+// 			}
+
+// 			for (int k = 4; k--;) {
+// 				y = i + by[k], x = j + bx[k];
+// 				while (valid(y, x)) {
+// 					min_cost[a[i][j] + 200][a[y][x] + 200] = 1;
+// 					min_change[a[i][j] + 200][a[y][x] + 200] = 0;
+// 					y += by[k], x += bx[k];
+// 				}
+// 			}
+
+// 			for (int k = 0; k < 3; ++k) {
+// 				for (int l = k + 1; l < 3; ++l) {
+// 					min_cost[a[i][j] + k * 100][a[i][j] + l * 100] = 1;
+// 					min_change[a[i][j] + k * 100][a[i][j] + l * 100] = 1;
+// 					min_cost[a[i][j] + l * 100][a[i][j] + k * 100] = 1;
+// 					min_change[a[i][j] + l * 100][a[i][j] + k * 100] = 1;
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	int len = n * n + 200;
+// 	for (int k = 1; k <= len; ++k) {
+// 		for (int i = 1; i <= len; ++i) {
+// 			for (int j = 1; j <= len; ++j) {
+// 				if (min_cost[i][j] > min_cost[i][k] + min_cost[k][j]) {
+// 					min_cost[i][j] = min_cost[i][k] + min_cost[k][j];
+// 					min_change[i][j] = min_change[i][k] + min_change[k][j];
+// 				}
+// 				else if (min_cost[i][j] == min_cost[i][k] + min_cost[k][j]) {
+// 					min_change[i][j] = min(min_change[i][j], min_change[i][k] + min_change[k][j]);
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	dp1[0][1] = dp1[1][1] = dp1[2][1] = 0;
+// 	for (int i = 2; i <= n * n; ++i) {
+// 		for (int k = 0; k < 3; ++k) {
+// 			for (int l = 0; l < 3; ++l) {
+// 				if (dp1[k][i] > dp1[l][i - 1] + min_cost[k * 100 + i][l * 100 + i - 1]) {
+// 					dp1[k][i] = dp1[l][i - 1] + min_cost[k * 100 + i][l * 100 + i - 1];
+// 					dp2[k][i] = dp2[l][i - 1] + min_change[k * 100 + i][l * 100 + i - 1];
+// 				}
+// 				else if (dp1[k][i] == dp1[l][i - 1] + min_cost[k * 100 + i][l * 100 + i - 1]) {
+// 					dp2[k][i] = min(dp2[k][i], dp2[l][i - 1] + min_change[k * 100 + i][l * 100 + i - 1]);
+// 				}
+// 			}
+
+// 		}
+// 	}
+
+// 	int a = INF, b = INF;
+// 	for (int i = 0; i < 3; ++i) {
+// 		if (a > dp1[i][n * n]) {
+// 			a = dp1[i][n * n];
+// 			b = dp2[i][n * n];
+// 		}
+// 		else if (a == dp1[i][n * n]) {
+// 			b = min(b, dp2[i][n * n]);
+// 		}
+// 	}
+
+// 	cout << a << ' ' << b;
+// }
