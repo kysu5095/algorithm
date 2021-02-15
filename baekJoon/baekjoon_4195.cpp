@@ -1,53 +1,51 @@
 // 친구 네트워크
-// 6:00
 
 #include <iostream>
 #include <string>
 #include <map>
+#define MAX 200005
 
 using namespace std;
 
-int test_case, F;
-int parent[100001], friend_n[100001];
-map<string, int> m;
+int n;
+int arr[MAX + 1], sz[MAX + 1];
 
-int find(int x) {
-	if (parent[x] == x) return x;
-	return parent[x] = find(parent[x]);
+void init() {
+	for (int i = 1; i <= MAX; i++) {
+		arr[i] = i;
+		sz[i] = 1;
+	}
 }
 
-int Union(int y, int x) {
-	y = find(y);
-	x = find(x);
-	if (y > x) {
-		parent[y] = x;
-		friend_n[x] += friend_n[y];
-		return friend_n[x];
-	}
-	else if(y < x){
-		parent[x] = y;
-		friend_n[y] += friend_n[x];
-		return friend_n[y];
-	}
-	return friend_n[y];
+int Find(int x) {
+	if (x == arr[x]) return x;
+	return arr[x] = Find(arr[x]);
 }
 
 int main() {
 	cin.sync_with_stdio(0);
 	cin.tie(0);
-	cin >> test_case;
-	while (test_case--) {
-		cin >> F;
+	int tc;
+	cin >> tc;
+	while (tc--) {
+		cin >> n;
+		init();
 		int idx = 1;
-		for (int i = 0; i <= F; i++)
-			parent[i] = i, friend_n[i] = 1;
-		m.clear();
-		for (int i = 0; i < F; i++) {
-			string str1, str2;
-			cin >> str1 >> str2;
-			if (!m.count(str1)) m.insert(make_pair(str1, idx++));
-			if (!m.count(str2)) m.insert(make_pair(str2, idx++));
-			cout << Union(m[str1], m[str2]) << '\n';
+		map<string, int> m;
+		for (int i = 0; i < n; i++) {
+			string name1, name2;
+			cin >> name1 >> name2;
+			if (m.find(name1) == m.end()) m[name1] = idx++;
+			if (m.find(name2) == m.end()) m[name2] = idx++;
+
+			int y = Find(m[name1]);
+			int x = Find(m[name2]);
+			if (y > x) swap(y, x);
+			if (y != x) {
+				arr[x] = y;
+				sz[y] += sz[x];
+			}
+			cout << sz[y] << '\n';
 		}
 	}
 	return 0;
