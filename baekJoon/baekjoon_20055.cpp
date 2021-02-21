@@ -6,7 +6,7 @@
 using namespace std;
 
 int n, k;
-deque<pair<bool ,int>> dq;
+deque<pair<bool, int>> dq;
 
 void rotate() {
 	if (dq[n - 1].first) dq[n - 1].first = false;
@@ -15,12 +15,13 @@ void rotate() {
 }
 
 void move() {
+	if (dq[n - 1].first) dq[n - 1].first = false;
 	for (int i = n - 2; i >= 0; i--) {
 		if (dq[i].first && !dq[i + 1].first && dq[i + 1].second) {
 			dq[i + 1].first = true;
 			dq[i + 1].second--;
-			if (!dq[i + 1].second) k--;
 			dq[i].first = false;
+			if (!dq[i + 1].second) k--;
 		}
 	}
 }
@@ -31,15 +32,6 @@ void insert() {
 		dq[0].second--;
 		if (!dq[0].second) k--;
 	}
-}
-
-bool check() {
-	int cnt = 0;
-	for (int i = 0; i < n * 2; i++)
-		if (!dq[i].second)
-			cnt++;
-	if (cnt >= k) return true;
-	return false;
 }
 
 int main() {
@@ -57,7 +49,7 @@ int main() {
 		rotate();
 		move();
 		insert();
-		if (check()) break;
+		if (k <= 0) break;
 	}
 	cout << turn << '\n';
 	return 0;
