@@ -57,7 +57,7 @@ int bfs() {
 					if (visited[node]) continue;
 					if (y1 > v[node].second.first || y2 < v[node].first.first) continue;
 					q.push(node);
-					visited[node];
+					visited[node] = true;
 				}
 				while (y >= y1 && y <= y2) {
 					if (y == dy && x == dx) return change;
