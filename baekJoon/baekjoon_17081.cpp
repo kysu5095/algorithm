@@ -89,7 +89,7 @@ void game(int sy, int sx) {
 			int enermy_hp = enermy[idx].h;
 			bool first_turn = true;
 			while (true) {
-				if (first_turn && actor.Jewelry["HU"] == 1) actor.cur_hp = actor.max_hp;
+				if (arr[y][x] == 'M' && first_turn && actor.Jewelry["HU"] == 1) actor.cur_hp = actor.max_hp;
 				if (first_turn && actor.Jewelry["CO"] == 1) {
 					if (actor.Jewelry["DX"] == 1) enermy[idx].h -= max(1, ((actor.att + actor.weapon_att) * 3 - enermy[idx].a));
 					else enermy[idx].h -= max(1, ((actor.att + actor.weapon_att) * 2 - enermy[idx].a));
@@ -97,7 +97,7 @@ void game(int sy, int sx) {
 				else enermy[idx].h -= max(1, (actor.att + actor.weapon_att - enermy[idx].a));
 				if (enermy[idx].h <= 0) break;
 
-				if (first_turn && actor.Jewelry["HU"] == 1) actor.cur_hp -= 0;
+				if (arr[y][x] == 'M' && first_turn && actor.Jewelry["HU"] == 1) actor.cur_hp -= 0;
 				else actor.cur_hp -= max(1, (enermy[idx].w - actor.def - actor.weapon_def));
 				if (actor.cur_hp <= 0) break;
 
