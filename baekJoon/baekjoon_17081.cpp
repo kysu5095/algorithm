@@ -11,7 +11,7 @@ using namespace std;
 int n, m;
 char arr[101][101];
 string command;
-int dy[4] = { 0, 0, 1, -1 }; // R L D U
+int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
 
 class ACTOR {
@@ -107,7 +107,8 @@ void game(int sy, int sx) {
 			if (enermy[idx].h <= 0) {
 				if (actor.Jewelry["HR"] == 1) {
 					actor.cur_hp += 3;
-					if (actor.cur_hp > actor.max_hp) actor.cur_hp = actor.max_hp;
+					if (actor.cur_hp > actor.max_hp) 
+						actor.cur_hp = actor.max_hp;
 				}
 				double exp = (double)enermy[idx].e;
 				if (actor.Jewelry["EX"] == 1) exp *= 1.2;
@@ -115,8 +116,7 @@ void game(int sy, int sx) {
 				if (actor.cur_exp >= actor.max_exp) {
 					actor.LV++;
 					actor.max_hp += 5;
-					actor.att += 2;
-					actor.def += 2;
+					actor.att += 2;	actor.def += 2;
 					actor.cur_hp = actor.max_hp;
 					actor.max_exp = actor.LV * 5;
 					actor.cur_exp = 0;
