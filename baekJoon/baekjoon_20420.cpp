@@ -15,7 +15,6 @@ class Point {
 public:
 	int y, x, L, R;
 };
-
 int get_direction(char& d) {
 	if (d == 'U') return 0;
 	else if (d == 'D') return 2;
