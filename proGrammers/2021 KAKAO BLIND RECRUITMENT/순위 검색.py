@@ -20,5 +20,4 @@ def solution(info, query):
                 else:
                     if i[idx] != q[idx]: break
         answer.append(val)
-    #print(answer)
     return answer
