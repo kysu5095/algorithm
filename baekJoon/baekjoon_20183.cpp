@@ -15,7 +15,7 @@ vector<pair<int, ll>> v[100001];
 vector<ll> bill;
 
 bool bfs(ll& mid) {
-	priority_queue<pair<int, ll>> pq;
+	priority_queue<pair<ll, int>> pq;
 	pq.push(make_pair(0, A));
 	vector<ll> visited(n + 1, LLONG_MAX);
 	visited[A] = 0;
