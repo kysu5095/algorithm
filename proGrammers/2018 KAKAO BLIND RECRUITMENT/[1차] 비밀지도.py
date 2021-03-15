@@ -1,19 +1,25 @@
-def solution(n, arr1, arr2):
-    answer = []
-    tmp1 = [[0 for _ in range(n)] for _ in range(n)]
-    tmp2 = [[0 for _ in range(n)] for _ in range(n)]
-    for idx, node in enumerate(arr1):
-        for i in range(n-1,-1,-1):
-            tmp1[idx][i] = node % 2
-            node = node // 2
-    for idx, node in enumerate(arr2):
-        for i in range(n-1,-1,-1):
-            tmp2[idx][i] = node % 2
-            node = node // 2
-    for i in range(n):
-        string = ""
-        for j in range(n):
-            if tmp1[i][j] == 1 or tmp2[i][j] == 1: string += "#"
-            else: string += " "
-        answer.append(string)
+def solution(dartResult):
+    answer = 0
+    arr = list()
+    for i in range(len(dartResult)):
+        if dartResult[i] == '1':
+            if dartResult[i+1] == '0': arr.append('10')
+            else: arr.append('1')
+        elif dartResult[i] == '0':
+            if i == 0 or dartResult[i-1] != '1': arr.append('0')
+        else: arr.append(dartResult[i])
+    idx = 0
+    game = [0]*3
+    for i in range(len(arr)):
+        if   arr[i] == 'S': game[idx-1] = game[idx-1]**1
+        elif arr[i] == 'D': game[idx-1] = game[idx-1]**2
+        elif arr[i] == 'T': game[idx-1] = game[idx-1]**3
+        elif arr[i] == '*': 
+            game[idx-1] *= 2
+            if idx >= 2: game[idx-2] *= 2
+        elif arr[i] == '#': game[idx-1]*=-1
+        else:
+            game[idx] = int(arr[i])
+            idx += 1
+    for i in game: answer += i
     return answer
