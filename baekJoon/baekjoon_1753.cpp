@@ -1,51 +1,49 @@
-// 최단 경로
+// 최단경로
 
-#include <iostream>
-#include <limits.h>
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 #include <vector>
 #include <queue>
+#include <limits.h>
 
-using namespace std;
+int V, E, K;
+int visited[20001];
+std::vector<std::pair<int, int>> v[20001];
 
-int V, E;
-int arr[20001];
-vector<pair<int, int>> vec[20001];
+void bfs() {
+	std::priority_queue<std::pair<int, int>> pq;
+	pq.push(std::make_pair(0, K));
+	for (int i = 1; i <= V; i++) visited[i] = INT_MAX;
+	visited[K] = 0;
 
-int main() {
-	cin.sync_with_stdio(0);
-	cin.tie(0);
-	int start;
-	cin >> V >> E >> start;
-	for (int i = 0; i < E; i++) {
-		int u, v, w;
-		cin >> u >> v >> w;
-		vec[u].push_back(make_pair(v, w));
-	}
-	for (int i = 1; i <= V; i++)
-		arr[i] = INT_MAX;
-	arr[start] = 0;
-
-	priority_queue<pair<int, int>> pq;
-	pq.push(make_pair(0, start));
-	int node, cost;
+	int node, d, nd;
 	while (!pq.empty()) {
 		node = pq.top().second;
-		cost = -pq.top().first;
+		d = -pq.top().first;
 		pq.pop();
-		if (cost > arr[node]) continue;
-		int len = vec[node].size();
-		for (int i = 0; i < len; i++) {
-			int next_node = vec[node][i].first;
-			int next_cost = vec[node][i].second;
-			if (cost + next_cost < arr[next_node]) {
-				arr[next_node] = cost + next_cost;
-				pq.push(make_pair(-arr[next_node], next_node));
-			}
+		if (visited[node] < d) continue;
+
+		for (auto& next : v[node]) {
+			nd = d + next.second;
+			if (nd > visited[next.first]) continue;
+			pq.push(std::make_pair(-nd, next.first));
+			visited[next.first] = nd;
 		}
 	}
+}
+
+int main() {
+	scanf("%d %d", &V, &E);
+	scanf("%d", &K);
+	for (int i = 0; i < E; i++) {
+		int start, end, distance;
+		scanf("%d %d %d", &start, &end, &distance);
+		v[start].push_back(std::make_pair(end, distance));
+	}
+	bfs();
 	for (int i = 1; i <= V; i++) {
-		if (arr[i] == INT_MAX) cout << "INF\n";
-		else cout << arr[i] << '\n';
+		if (visited[i] == INT_MAX) printf("INF\n");
+		else printf("%d\n", visited[i]);
 	}
 	return 0;
 }
