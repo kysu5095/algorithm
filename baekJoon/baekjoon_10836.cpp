@@ -1,49 +1,43 @@
 // 여왕벌
-// 11:50
 
-#include <iostream>
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
 #include <algorithm>
 
 using namespace std;
 
-int m, n;
-int arr[701][701] = { {0,}, };
+int arr[701][701];
+int n, t;
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(0);
-	cin >> m >> n;
-	int a, b, c, y, x;
-	for (int i = 0; i < n; i++) {
-		y = m - 1;
-		x = 0;
-		cin >> a >> b >> c;
-		while (a) {
-			a--;
+	scanf("%d %d", &n, &t);
+	for (int i = 0; i < t; i++) {
+		int y = n - 1;
+		int x = 0;
+		int a, b, c;
+		scanf("%d %d %d", &a, &b, &c);
+		while (a--) {
 			if (y) y--;
 			else x++;
 		}
-		while (b) {
+		while (b--) {
 			arr[y][x]++;
-			b--;
 			if (y) y--;
 			else x++;
 		}
-		while (c) {
+		while (c--) {
 			arr[y][x] += 2;
-			c--;
 			if (y) y--;
 			else x++;
 		}
 	}
-	for (int i = 1; i < m; i++)
-		for (int j = 1; j < m; j++)
-			arr[i][j] = max(arr[i][j - 1], max(arr[i - 1][j - 1], arr[i - 1][j]));
-	for (int i = 0; i < m; i++) {
-		for (int j = 0; j < m; j++) {
-			cout << arr[i][j] + 1 << " ";
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			if (!i || !j) printf("%d ", arr[i][j] + 1);
+			else printf("%d ", arr[0][j] + 1);
 		}
-		cout << '\n';
+		printf("\n");
 	}
 	return 0;
 }
