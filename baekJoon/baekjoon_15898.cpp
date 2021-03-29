@@ -1,161 +1,141 @@
 // 피아의 아틀리에 ~신비한 대회의 연금술사~
 
-#include <iostream>
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 #include <algorithm>
 
 using namespace std;
 
 int n, res = 0;
-class Arr {
-public:
-	int num = 0;
-	char color = 'W';
-};
-Arr arr[5][5];
-Arr material[10][4][4];
-Arr tmp[4][4];
-int sequence1[10];
-int sequence2[10];
-int sequence3[10];
-bool visited[10] = { false, };
+bool visited[11];
+int sequence_1[3];
+int sequence_2[3];
+int sequence_3[3];
 
-void initialize() {
+struct MATERIAL {
+	int val = 0;
+	char ch = 'W';
+};
+MATERIAL arr[5][5];
+MATERIAL material[10][4][4];
+MATERIAL rotate_arr[4][4];
+
+void init() {
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
-			arr[i][j].num = 0;
-			arr[i][j].color = 'W';
+			arr[i][j].ch = 'W';
+			arr[i][j].val = 0;
 		}
 	}
 }
 
-void right_0(int& num) {
+void rotate(int& idx, int& angle) {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			tmp[i][j].num = material[num][i][j].num;
-			tmp[i][j].color = material[num][i][j].color;
+			switch (angle)
+			{
+			case 0: rotate_arr[i][j] = material[idx][i][j]; break;
+			case 1: rotate_arr[i][j] = material[idx][3 - j][i]; break;
+			case 2: rotate_arr[i][j] = material[idx][3 - i][3 - j]; break;
+			case 3: rotate_arr[i][j] = material[idx][j][3 - i]; break;
+			}
 		}
 	}
 }
-
-void right_90(int& num) {
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			tmp[i][j].num = material[num][3 - j][i].num;
-			tmp[i][j].color = material[num][3 - j][i].color;
-		}
-	}
-}
-
-void right_180(int& num) {
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			tmp[i][j].num = material[num][3 - i][3 - j].num;
-			tmp[i][j].color = material[num][3 - i][3 - j].color;
-		}
-	}
-}
-
-void right_270(int& num) {
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			tmp[i][j].num = material[num][j][3 - i].num;
-			tmp[i][j].color = material[num][j][3 - i].color;
-		}
-	}
-}
-
-// 재료 회전 순서 구하기 (0도, 90도 180도 270도)
-void dfs3(int cnt) {
+// 회전
+void dfs_3(int cnt) {
 	if (cnt == 3) {
-		int num, coor, ro, y, x;
-		int red = 0, blue = 0, green = 0, yellow = 0, total = 0;
-		for (int i = 0; i < 3; i++) {
-			num  = sequence1[i];
-			coor = sequence2[i];
-			ro   = sequence3[i];
-			y    = 0;
-			x    = 0;
-
-			if (coor == 1) x++;
-			else if (coor == 2) y++;
-			else if (coor == 3) x++, y++;
-
-			if (ro == 0) right_0(num);
-			else if (ro == 1) right_90(num);
-			else if (ro == 2)right_180(num);
-			else right_270(num);
-
-			for (int a = y, c = 0; a < y + 4; a++, c++) {
-				for (int b = x, d = 0; b < x + 4; b++, d++) {
-					if (tmp[c][d].color != 'W') arr[a][b].color = tmp[c][d].color;
-					arr[a][b].num += tmp[c][d].num;
-					if (arr[a][b].num < 0) arr[a][b].num = 0;
-					else if (arr[a][b].num > 9) arr[a][b].num = 9;
+		int index, y, x, angle;
+		for (int idx = 0; idx < 3; idx++) {
+			index = sequence_1[idx];
+			switch (sequence_2[idx])
+			{
+			case 0: y = 0; x = 0; break;
+			case 1: y = 0; x = 1; break;
+			case 2: y = 1; x = 0; break;
+			case 3: y = 1; x = 1; break;
+			}
+			switch (sequence_3[idx])
+			{
+			case 0: angle = 0; break;
+			case 1: angle = 1; break;
+			case 2: angle = 2; break;
+			case 3: angle = 3; break;
+			}
+			rotate(index, angle);
+			for (int _y = y, __y = 0; _y < y + 4; _y++, __y++) {
+				for (int _x = x, __x = 0; _x < x + 4; _x++, __x++) {
+					char ch = rotate_arr[__y][__x].ch;
+					int val = rotate_arr[__y][__x].val;
+					if (ch != 'W') arr[_y][_x].ch = ch;
+					arr[_y][_x].val += val;
+					if (arr[_y][_x].val < 0) arr[_y][_x].val = 0;
+					else if (arr[_y][_x].val > 9) arr[_y][_x].val = 9;
 				}
 			}
 		}
 
+		int R = 0, B = 0, G = 0, Y = 0;
 		for (int i = 0; i < 5; i++) {
 			for (int j = 0; j < 5; j++) {
-				if (arr[i][j].color == 'R') red += arr[i][j].num;
-				else if (arr[i][j].color == 'B') blue += arr[i][j].num;
-				else if (arr[i][j].color == 'G') green += arr[i][j].num;
-				else if (arr[i][j].color == 'Y') yellow += arr[i][j].num;
+				switch (arr[i][j].ch)
+				{
+				case 'W': break;
+				case 'R': R += arr[i][j].val; break;
+				case 'B': B += arr[i][j].val; break;
+				case 'G': G += arr[i][j].val; break;
+				case 'Y': Y += arr[i][j].val; break;
+				}
 			}
 		}
-		total = (7 * red) + (5 * blue) + (3 * green) + (2 * yellow);
+		int total = (7 * R) + (5 * B) + (3 * G) + (2 * Y);
 		res = max(res, total);
-		initialize();
+		init();
 		return;
 	}
 	for (int i = 0; i < 4; i++) {
-		sequence3[cnt] = i;
-		dfs3(cnt + 1);
+		sequence_3[cnt] = i;
+		dfs_3(cnt + 1);
 	}
 }
-
-// 재료 넣을 처음 좌표 구하기 (0, 0) || (0, 1) || (1, 0) || (1, 1)
-void dfs2(int cnt) {
+// 좌표
+void dfs_2(int cnt) {
 	if (cnt == 3) {
-		dfs3(0);
+		dfs_3(0);
 		return;
 	}
 	for (int i = 0; i < 4; i++) {
-		sequence2[cnt] = i;
-		dfs2(cnt + 1);
+		sequence_2[cnt] = i;
+		dfs_2(cnt + 1);
 	}
 }
-
-// 재료 넣을 순서 정하기
-void dfs1(int cnt) {
+// 순서
+void dfs_1(int cnt) {
 	if (cnt == 3) {
-		dfs2(0);
+		dfs_2(0);
 		return;
 	}
 	for (int i = 0; i < n; i++) {
 		if (!visited[i]) {
 			visited[i] = true;
-			sequence1[cnt] = i;
-			dfs1(cnt + 1);
+			sequence_1[cnt] = i;
+			dfs_1(cnt + 1);
 			visited[i] = false;
 		}
 	}
 }
 
 int main() {
-	cin.sync_with_stdio(0);
-	cin.tie(0);
-	cin >> n;
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < 4; j++)
-			for (int k = 0; k < 4; k++)
-				cin >> material[i][j][k].num;
-		for (int j = 0; j < 4; j++)
-			for (int k = 0; k < 4; k++)
-				cin >> material[i][j][k].color;
+	scanf("%d", &n);
+	for (int idx = 0; idx < n; idx++) {
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				scanf("%d", &material[idx][i][j].val);
+		for (int i = 0; i < 4; i++)
+			for (int j = 0; j < 4; j++)
+				scanf(" %c", &material[idx][i][j].ch);
 	}
-    
-	dfs1(0);
-	cout << res << '\n';
+	dfs_1(0);
+	printf("%d\n", res);
 	return 0;
 }
