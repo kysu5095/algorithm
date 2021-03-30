@@ -1,48 +1,35 @@
 // 연결 요소의 개수
 
-#include <iostream>
-#include <vector>
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
 #include <set>
 
-using namespace std;
+int n, m;
+int parent[1001];
+std::set<int> s;
 
-int n, m, visit_cnt = 0, res = 0;
-set<int> node;
-vector<int> connected[1001];
-bool visited[1001] = { false, };
+int Find(int x) {
+	if (parent[x] == x) return x;
+	return parent[x] = Find(parent[x]);
+}
 
-void dfs(int idx) {
-	visited[idx] = true;
-	visit_cnt++;
-	int len = connected[idx].size();
-	for (int i = 0; i < len; i++) {
-		if (!visited[connected[idx][i]])
-			dfs(connected[idx][i]);
-	}
+void Union(int y, int x) {
+	y = Find(y);
+	x = Find(x);
+	if (y == x) return;
+	else if (y > x) parent[y] = x;
+	else parent[x] = y;
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	int first, second;
-	cin >> n >> m;
+	scanf("%d %d", &n, &m);
+	for (int i = 1; i <= n; i++) parent[i] = i;
 	for (int i = 0; i < m; i++) {
-		cin >> first >> second;
-		node.insert(first);
-		node.insert(second);
-		connected[first].push_back(second);
-		connected[second].push_back(first);
+		int start, end;
+		scanf(" %d %d", &start, &end);
+		Union(start, end);
 	}
-	set<int>::iterator iter;
-	for (iter = node.begin(); iter != node.end(); iter++) {
-		if (!visited[*iter]) {
-			dfs(*iter);
-			res++;
-		}
-	}
-	if (node.size() < n)
-		res += (n - node.size());
-
-	cout << res << '\n';
+	for (int i = 1; i <= n; i++) s.insert(Find(parent[i]));
+	printf("%d\n", (int)s.size());
 	return 0;
 }
