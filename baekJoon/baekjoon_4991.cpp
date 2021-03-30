@@ -1,109 +1,79 @@
 // 로봇 청소기
-// 2:20
 
-#include <iostream>
-#include <deque>
-#include <queue>
-#include <limits.h>
+#include <stdio.h>
 #include <string.h>
+#include <algorithm>
+#include <limits.h>
+#include <queue>
+#include <map>
 
 using namespace std;
 
-int w, h, vy, vx, res;
+int w, h, cnt, res;
 char arr[21][21];
-int map[11][11];
-bool visited[21][21];
-int virus[12];
+bool visited[21][21][(1 << 10) + 2];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
-deque<pair<int, int>> dq;
+map<pair<int, int>, int> m;
 
-void dfs(int cnt) {
-	if (cnt == dq.size()) {
-		int t = 0;
-		for (int i = 0; i < dq.size() - 1; i++)
-			t += map[virus[i]][virus[i + 1]];
-		res = res > t ? t : res;
-		return;
-	}
-	for (int i = 1; i < dq.size(); i++) {
-		if (!virus[i]) {
-			virus[i] = cnt;
-			dfs(cnt + 1);
-			virus[i] = 0;
-		}
-	}
-}
-
-bool bfs(int sy, int sx) {
+int bfs(int y, int x) {
+	int complete = 0;
+	for (int i = 0; i < cnt; i++) complete += (1 << i);
+	queue<pair<int, pair<int, int>>> q;
+	q.push(make_pair(0, make_pair(y, x)));
 	memset(visited, false, sizeof(visited));
-	queue<pair<int, int>> q;
-	q.push(make_pair(sy, sx));
-	visited[sy][sx] = true;
-	int y, x, ny, nx, len, cnt = dq.size() - 1, t = 0;
+	visited[y][x][0] = true;
+
+	int ny, nx, cur, ncur, len, t = 0;
 	while (!q.empty()) {
 		t++;
 		len = q.size();
 		while (len--) {
-			y = q.front().first;
-			x = q.front().second;
+			y = q.front().second.first;
+			x = q.front().second.second;
+			cur = q.front().first;
 			q.pop();
+
 			for (int i = 0; i < 4; i++) {
 				ny = y + dy[i];
 				nx = x + dx[i];
-				if (ny >= 0 && ny < h && nx >= 0 && nx < w && arr[ny][nx] != 'x' && !visited[ny][nx]) {
-					if (arr[ny][nx] != '.') {
-						map[arr[sy][sx] - '0'][arr[ny][nx] - '0'] = t;
-						map[arr[ny][nx] - '0'][arr[sy][sx] - '0'] = t;
-						cnt--;
-						if (!cnt) return true;
-					}
-					q.push(make_pair(ny, nx));
-					visited[ny][nx] = true;
+				if (ny < 0 || ny == h || nx < 0 || nx == w || visited[ny][nx][cur] || arr[ny][nx] != '.') continue;
+				ncur = cur;
+				if (m.count(make_pair(ny, nx))) {
+					ncur |= (1 << m[make_pair(ny, nx)]);
+					if (ncur == complete) return t;
 				}
+				q.push(make_pair(ncur, make_pair(ny, nx)));
+				visited[ny][nx][ncur] = true;
 			}
 		}
 	}
-	return false;
-}
-
-bool get_distance() {
-	for (int i = 0; i < dq.size(); i++) {
-		if(!bfs(dq[i].first, dq[i].second))
-			return false;
-	}
-	return true;
+	return -1;
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
 	while (true) {
-		cin >> w >> h;
+		scanf(" %d %d", &w, &h);
 		if (!w && !h) break;
-		memset(virus, 0, sizeof(virus));
-		dq.clear();
+		m.clear();
 		res = INT_MAX;
-		int cnt = 0;
+		cnt = 0;
+		int y, x;
 		for (int i = 0; i < h; i++) {
-			cin >> arr[i];
+			scanf("%s", arr[i]);
 			for (int j = 0; j < w; j++) {
-				if (arr[i][j] == '*')
-					dq.push_back(make_pair(i, j));
-				else if (arr[i][j] == 'o')
-					vy = i, vx = j;
+				if (arr[i][j] == 'o') {
+					arr[i][j] = '.';
+					y = i;
+					x = j;
+				}
+				else if (arr[i][j] == '*') {
+					arr[i][j] = '.';
+					m[make_pair(i, j)] = cnt++;
+				}
 			}
 		}
-		dq.push_front(make_pair(vy, vx));
-		for (int i = 0; i < dq.size(); i++) {
-			arr[dq[i].first][dq[i].second] = (cnt + '0');
-			cnt++;
-		}
-		if (get_distance()) {
-			dfs(1);
-			cout << res << '\n';
-		}
-		else cout << "-1\n";
+		printf("%d\n", bfs(y, x));
 	}
 	return 0;
 }
