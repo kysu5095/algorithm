@@ -1,37 +1,28 @@
 // 로또
-// 7:00
 
-#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <string.h>
 
 using namespace std;
 
-int k;
-int arr[14];
-int print[14];
-
-void dfs(int idx, int cnt) {
-	if (cnt == 6) {
-		for (int i = 0; i < 6; i++)
-			cout << print[i] << " ";
-		cout << '\n';
-		return;
-	}
-	for (int i = idx; i < k; i++) {
-		print[cnt] = arr[i];
-		dfs(i + 1, cnt + 1);
-	}
-}
+int n;
+int arr[13];
+bool visited[13];
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
 	while (true) {
-		cin >> k;
-		if (!k) break;
-		for (int i = 0; i < k; i++)
-			cin >> arr[i];
-		dfs(0, 0);
-		cout << '\n';
+		scanf(" %d", &n);
+		if (!n) break;
+		for (int i = 0; i < n; i++) scanf(" %d", &arr[i]);
+		memset(visited, true, sizeof(visited));
+		for (int i = 0; i < 6; i++) visited[i] = false;
+		do {
+			for (int i = 0; i < n; i++)
+				if (!visited[i]) printf("%d ", arr[i]);
+			printf("\n");
+		} while (next_permutation(visited, visited + n));
+		printf("\n");
 	}
 	return 0;
 }
