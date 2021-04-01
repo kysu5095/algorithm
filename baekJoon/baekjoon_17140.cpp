@@ -1,4 +1,4 @@
-// 아치원 배열과 연산
+// 이차원 배열과 연산
 
 #include <stdio.h>
 #include <string.h>
