@@ -12,7 +12,8 @@ struct Info {
 
 void _1_operator() { 
 	for (int i = 0; i < 4; i++) {
-		state[i].up_down ^= true;
+		//state[i].up_down ^= true;
+		(state[i].rotation & 1 ? state[i].left_right : state[i].up_down) ^= true;
 		int& rocation = state[i].rocation;
 		switch (rocation) {
 		case 0:	rocation = 3; break;
@@ -25,7 +26,8 @@ void _1_operator() {
 
 void _2_operator() { 
 	for (int i = 0; i < 4; i++) {
-		state[i].left_right ^= true;
+		//state[i].left_right ^= true;
+		(state[i].rotation & 1 ? state[i].up_down : state[i].left_right) ^= true;
 		int& rocation = state[i].rocation;
 		switch (rocation) {
 		case 0:	rocation = 1; break;
