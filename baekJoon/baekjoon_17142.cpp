@@ -1,36 +1,32 @@
 // 연구소 3
-// 11:00
 
-#include <iostream>
+#include <stdio.h>
 #include <vector>
 #include <queue>
 #include <string.h>
 #include <limits.h>
+#include <algorithm>
 
 using namespace std;
 
-int n, m, cnt = 0, res = INT_MAX;
-int arr[51][51] = { {0,}, };
-int tmp[51][51];
-int virus[11] = { -1, };
-
-class Point {
-public:
-	int y, x;
-};
-Point p[4] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+int n, m, empty_cnt = 0, res = INT_MAX;
+int arr[51][51];
+bool visited[51][51];
+int dy[4] = { 0, 0, 1, -1 };
+int dx[4] = { 1, -1, 0, 0 };
+vector<int> virus;
 vector<pair<int, int>> v;
 
 int bfs() {
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < n; j++)
-			tmp[i][j] = arr[i][j];
+	int y, x, ny, nx, len, t = 0, cnt = 0;
+	memset(visited, false, sizeof(visited));
 	queue<pair<int, int>> q;
 	for (int i = 0; i < m; i++) {
-		q.push(make_pair(v[virus[i]].first, v[virus[i]].second));
-		tmp[v[virus[i]].first][v[virus[i]].second] = -2;
+		y = v[virus[i]].first;
+		x = v[virus[i]].second;
+		q.push(make_pair(y, x));
+		visited[y][x] = true;
 	}
-	int y, x, ny, nx, len, v_cnt = cnt, t = 0;
 	while (!q.empty()) {
 		t++;
 		len = q.size();
@@ -39,18 +35,16 @@ int bfs() {
 			x = q.front().second;
 			q.pop();
 			for (int i = 0; i < 4; i++) {
-				ny = y + p[i].y;
-				nx = x + p[i].x;
-				if (ny >= 0 && ny < n && nx >= 0 && nx < n) {
-					if (!tmp[ny][nx] || tmp[ny][nx] == -1) {
-						if (!tmp[ny][nx]) v_cnt--;
-						q.push(make_pair(ny, nx));
-						tmp[ny][nx] = t;
-					}
-				}
+				ny = y + dy[i];
+				nx = x + dx[i];
+				if (ny < 0 || ny == n || nx < 0 || nx == n || visited[ny][nx] || arr[ny][nx] == 1) continue;
+				if (arr[ny][nx] == 0) cnt++;
+				q.push(make_pair(ny, nx));
+				visited[ny][nx] = true;
 			}
+			if (cnt == empty_cnt) return t;
 		}
-		if (!v_cnt) return t;
+		if (t >= res) break;
 	}
 	return INT_MAX;
 }
@@ -58,40 +52,129 @@ int bfs() {
 void dfs(int idx, int cnt) {
 	if (cnt == m) {
 		int t = bfs();
-		res = res > t ? t : res;
+		res = min(res, t);
 		return;
 	}
-	int len = v.size();
-	for (int i = idx; i < len; i++) {
-		virus[cnt] = i;
+	for (int i = idx; i < v.size(); i++) {
+		virus.push_back(i);
 		dfs(i + 1, cnt + 1);
+		virus.pop_back();
 	}
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	cin >> n >> m;
+	scanf("%d %d", &n, &m);
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
-			cin >> arr[i][j];
-			if (!arr[i][j]) cnt++;
-			else if (arr[i][j] == 1)
-				arr[i][j] = -2;
-			else if (arr[i][j] == 2) {
-				arr[i][j] = -1;
-				v.push_back(make_pair(i, j));
-			}
+			scanf(" %d", &arr[i][j]);
+			if (arr[i][j] == 0) empty_cnt++;
+			else if (arr[i][j] == 2) v.push_back(make_pair(i, j));
 		}
 	}
-	if (cnt)
-		dfs(0, 0);
-	else
-		res = 0;
+	if (empty_cnt == 0) {
+		printf("0\n");
+		return 0;
+	}
+	dfs(0, 0);
 	if (res == INT_MAX) res = -1;
-	cout << res << '\n';
+	printf("%d\n", res);
 	return 0;
 }
+
+// // 연구소 3
+// // 11:00
+
+// #include <iostream>
+// #include <vector>
+// #include <queue>
+// #include <string.h>
+// #include <limits.h>
+
+// using namespace std;
+
+// int n, m, cnt = 0, res = INT_MAX;
+// int arr[51][51] = { {0,}, };
+// int tmp[51][51];
+// int virus[11] = { -1, };
+
+// class Point {
+// public:
+// 	int y, x;
+// };
+// Point p[4] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+// vector<pair<int, int>> v;
+
+// int bfs() {
+// 	for (int i = 0; i < n; i++)
+// 		for (int j = 0; j < n; j++)
+// 			tmp[i][j] = arr[i][j];
+// 	queue<pair<int, int>> q;
+// 	for (int i = 0; i < m; i++) {
+// 		q.push(make_pair(v[virus[i]].first, v[virus[i]].second));
+// 		tmp[v[virus[i]].first][v[virus[i]].second] = -2;
+// 	}
+// 	int y, x, ny, nx, len, v_cnt = cnt, t = 0;
+// 	while (!q.empty()) {
+// 		t++;
+// 		len = q.size();
+// 		while (len--) {
+// 			y = q.front().first;
+// 			x = q.front().second;
+// 			q.pop();
+// 			for (int i = 0; i < 4; i++) {
+// 				ny = y + p[i].y;
+// 				nx = x + p[i].x;
+// 				if (ny >= 0 && ny < n && nx >= 0 && nx < n) {
+// 					if (!tmp[ny][nx] || tmp[ny][nx] == -1) {
+// 						if (!tmp[ny][nx]) v_cnt--;
+// 						q.push(make_pair(ny, nx));
+// 						tmp[ny][nx] = t;
+// 					}
+// 				}
+// 			}
+// 		}
+// 		if (!v_cnt) return t;
+// 	}
+// 	return INT_MAX;
+// }
+
+// void dfs(int idx, int cnt) {
+// 	if (cnt == m) {
+// 		int t = bfs();
+// 		res = res > t ? t : res;
+// 		return;
+// 	}
+// 	int len = v.size();
+// 	for (int i = idx; i < len; i++) {
+// 		virus[cnt] = i;
+// 		dfs(i + 1, cnt + 1);
+// 	}
+// }
+
+// int main() {
+// 	ios_base::sync_with_stdio(false);
+// 	cin.tie(NULL);
+// 	cin >> n >> m;
+// 	for (int i = 0; i < n; i++) {
+// 		for (int j = 0; j < n; j++) {
+// 			cin >> arr[i][j];
+// 			if (!arr[i][j]) cnt++;
+// 			else if (arr[i][j] == 1)
+// 				arr[i][j] = -2;
+// 			else if (arr[i][j] == 2) {
+// 				arr[i][j] = -1;
+// 				v.push_back(make_pair(i, j));
+// 			}
+// 		}
+// 	}
+// 	if (cnt)
+// 		dfs(0, 0);
+// 	else
+// 		res = 0;
+// 	if (res == INT_MAX) res = -1;
+// 	cout << res << '\n';
+// 	return 0;
+// }
 
 // #include <iostream>
 // #include <queue>
