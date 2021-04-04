@@ -1,115 +1,99 @@
 // 미네랄 2
 
-#include <iostream>
-#include <string.h>
-#include <queue>
+#include <stdio.h>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
-int r, c, cnt;
-int bar[101];
+int r, c, n;
 char arr[101][101];
-bool visited[101][101];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
-vector<pair<int, int>> v;
 
-void falling() {
-	int y, x, add = 0;
-	bool flag = true;
-	int len = v.size();
-	while (flag) {
-		add++;
-		for (int i = 0; i < len; i++) {
-			y = v[i].first + add;
-			x = v[i].second;
-			if (y == r || arr[y][x] == 'x') {
-				flag = false;
+void down_cluster(vector<pair<int, int>>& v) {
+	bool find = false;
+	int cnt = 0;
+	while (!find) {
+		cnt++;
+		for (auto& node: v) {
+			if (node.first + cnt == r || arr[node.first + cnt][node.second] == 'x') {
+				find = true;
 				break;
 			}
 		}
 	}
-	add--;
-	for (int i = 0; i < len; i++)
-		arr[v[i].first + add][v[i].second] = 'x';
+
+	for (auto& node : v)
+		arr[node.first + cnt - 1][node.second] = 'x';
 }
 
-bool bfs(int y, int x) {
-	int ny, nx, len;
+void redraw_cluster(int& y, int& x, vector<pair<int, int>>& v) {
+	for (auto& node : v)
+		arr[node.first][node.second] = 'x';
+}
+
+void boom(int _y, int _x) {
 	queue<pair<int, int>> q;
-	q.push(make_pair(y, x));
-	visited[y][x] = true;
-	v.push_back(make_pair(y, x));
+	q.push(make_pair(_y, _x));
+
+	vector<pair<int, int>> v;
+	v.push_back(make_pair(_y, _x));
+	arr[_y][_x] = '.';
+
+	bool find = false;
+	int y, x, ny, nx;
 	while (!q.empty()) {
 		y = q.front().first;
 		x = q.front().second;
 		q.pop();
+		if (y == r - 1) {
+			find = true;
+			break;
+		}
 		for (int i = 0; i < 4; i++) {
 			ny = y + dy[i];
 			nx = x + dx[i];
-			if (ny < 0 || ny == r || nx < 0 || nx == c) continue;
-			if (visited[ny][nx] || arr[ny][nx] == '.') continue;
-			if (ny == r - 1) {
-				v.clear();
-				return false;
-			}
-			visited[ny][nx] = true;
+			if (ny < 0 || ny == r || nx < 0 || nx == c || arr[ny][nx] == '.') continue;
 			q.push(make_pair(ny, nx));
+			arr[ny][nx] = '.';
 			v.push_back(make_pair(ny, nx));
 		}
 	}
-	len = v.size();
-	for (int i = 0; i < len; i++)
-		arr[v[i].first][v[i].second] = '.';
-	return true;
+	if (find) redraw_cluster(_y, _x, v);
+	else down_cluster(v);
 }
 
-void game(int y, int x, bool flag) {
-	int ny, nx;
-	while (x >= 0 && x != c) {
+void throw_stick(int y, int d) {
+	int x;
+	if (d) x = c - 1;
+	else x = 0;
+
+	while (x >= 0 && x < c) {
 		if (arr[y][x] == 'x') {
 			arr[y][x] = '.';
 			for (int i = 0; i < 4; i++) {
-				ny = y + dy[i];
-				nx = x + dx[i];
-				memset(visited, false, sizeof(visited));
-				if (ny < 0 || ny == r || nx < 0 || nx == c || visited[ny][nx]) continue;
-				if (arr[ny][nx] == '.') continue;
-				if (bfs(ny, nx)) {
-					falling();
-					v.clear();
-					break;
-				}
+				int ny = y + dy[i];
+				int nx = x + dx[i];
+				if (ny < 0 || ny == r || nx < 0 || nx == c || arr[ny][nx] == '.')continue;
+				boom(ny, nx);
 			}
 			break;
 		}
-		if (flag) x++;
-		else x--;
+		x += dx[d];
 	}
 }
 
-
 int main() {
-	cin.sync_with_stdio(0);
-	cin.tie(0);
-	cin >> r >> c;
-	for (int i = 0; i < r; i++)
-		for (int j = 0; j < c; j++)
-			cin >> arr[i][j];
-	cin >> cnt;
-	for (int i = 0; i < cnt; i++)
-		cin >> bar[i];
-	for (int i = 0; i < cnt; i++) {
-		if (i % 2 == 0) game(r - bar[i], 0, true);
-		else game(r - bar[i], c - 1, false);
+	scanf(" %d %d", &r, &c);
+	for (int i = 0; i < r; i++) scanf("%s", arr[i]);
+	scanf(" %d", &n);
+	for(int i = 0; i < n; i++) {
+		int input;
+		scanf(" %d", &input);
+		if (i % 2) throw_stick(r - input, 1);
+		else throw_stick(r - input, 0);
 	}
-	for (int i = 0; i < r; i++) {
-		for (int j = 0; j < c; j++) {
-			cout << arr[i][j];
-		}
-		cout << '\n';
-	}
-	cout << '\n';
+	for (int i = 0; i < r; i++) printf("%s\n", arr[i]);
 	return 0;
 }
