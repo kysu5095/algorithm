@@ -1,6 +1,6 @@
 // 보스몬스터 전리품
 
-#include <iostream>
+#include <stdio.h>
 #include <vector>
 #include <queue>
 
@@ -9,17 +9,17 @@ using namespace std;
 int n, m, p, HP;
 char arr[1001][1001];
 int attack[26];
-bool visited[26][1001][1001] = { { {false, }, }, };
+bool visited[26][1001][1001];
 bool check[26] = { false, };
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
 pair<int, int> person[26];
 queue<pair<int, pair<int, int>>> q;
+vector<int> v;
 
 int bfs() {
 	int y, x, ny, nx, num, len, cnt = 0;
-	vector<int> v;
-	while ((!v.empty() || !q.empty()) && HP > 0) {
+	while (!q.empty()) {
 		len = q.size();
 		while (len--) {
 			num = q.front().first;
@@ -44,32 +44,30 @@ int bfs() {
 		}
 		for (auto idx : v) {
 			HP -= attack[idx];
-			if (HP <= 0) break;
+			if (HP <= 0) return cnt;
 		}
 	}
 	return cnt;
 }
 
 int main() {
-	cin.sync_with_stdio(0);
-	cin.tie(0);
 	char num;
 	int damage;
-	cin >> n >> m >> p;
+	scanf(" %d %d %d", &n, &m, &p);
 	for (int i = 0; i < n; i++) {
-		cin >> arr[i];
+		scanf("%s", arr[i]);
 		for (int j = 0; j < m; j++) {
 			if (arr[i][j] >= 'a' && arr[i][j] <= 'z')
 				person[arr[i][j] - 'a'] = make_pair(i, j);
 		}
 	}
 	for (int i = 0; i < p; i++) {
-		cin >> num >> damage;
+		scanf(" %c %d", &num, &damage);
 		q.push(make_pair(num - 'a', make_pair(person[num - 'a'].first, person[num - 'a'].second)));
 		visited[num - 'a'][person[num - 'a'].first][person[num - 'a'].second] = true;
 		attack[num - 'a'] = damage;
 	}
-	cin >> HP;
-	cout << bfs() << '\n';
+	scanf(" %d", &HP);
+	printf("%d\n", bfs());
 	return 0;
 }
