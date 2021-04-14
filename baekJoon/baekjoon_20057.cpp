@@ -6,29 +6,28 @@ int n, res = 0;
 int arr[500][500];
 int dy[4] = { 0, 1, 0, -1 };
 int dx[4] = { -1, 0, 1, 0 };
-int ddy[4][9] =		{ {-2, -1, -1, -1, 0, 1, 1, 1, 2},
-					  {-1, -1, 0, 0, 0, 0, 1, 1, 2},
-					  {-2, -1, -1, -1, 0, 1, 1, 1, 2},
-					  {-2, -1, -1, 0, 0, 0, 0, 1, 1} };
-int ddx[4][9] =		{ {0, -1, 0, 1, -2, -1, 0, 1, 0},
-					  {-1, 1, -2, -1, 1, 2, -1, 1, 0},
-					  {0, -1, 0, 1, 2, -1, 0, 1, 0},
-					  {0, -1, 1, -2, -1, 1, 2, -1, 1} };
-int percent[4][9] = { { 2, 10, 7, 1, 5, 10, 7, 1, 2 },
-					  { 1, 1, 2, 7, 7, 2, 10, 10, 5},
+int ddy[4][9] = { {-2, -1, -1, -1, 0, 1, 1, 1, 2},
+				  {-1, -1, 0, 0, 0, 0, 1, 1, 2}, 
+				  {-2, -1, -1, -1, 0, 1, 1, 1, 2},
+				  {-2, -1, -1, 0, 0, 0, 0, 1, 1} };
+int ddx[4][9] = { {0, -1, 0, 1, -2, -1, 0, 1, 0},
+			      {-1, 1, -2, -1, 1, 2, -1, 1, 0}, 
+				  {0, -1, 0, 1, 2, -1, 0, 1, 0},
+				  {0, -1, 1, -2, -1, 1, 2, -1, 1} };
+int percent[4][9] = { {2, 10, 7, 1, 5, 10, 7, 1, 2},
+					  {1, 1, 2, 7, 7, 2, 10, 10, 5}, 
 					  {2, 1, 7, 10, 5, 1, 7, 10, 2},
 					  {5, 10, 10, 2, 7, 7, 2, 1, 1} };
 
-void wind(int& y, int& x, int& d) {
-	int total = arr[y][x];
-	int ny, nx, rate;
+void spread(int y, int x, int d) {
+	int ny, nx, per, val = arr[y][x];
 	for (int i = 0; i < 9; i++) {
 		ny = y + ddy[d][i];
 		nx = x + ddx[d][i];
-		rate = total * percent[d][i] / 100;
-		arr[y][x] -= rate;
-		if (ny < 0 || ny >= n || nx < 0 || nx >= n) res += rate;
-		else arr[ny][nx] += rate;
+		per = val * percent[d][i] / 100;
+		arr[y][x] -= per;
+		if (ny < 0 || ny >= n || nx < 0 || nx >= n) res += per;
+		else arr[ny][nx] += per;
 	}
 	ny = y + dy[d];
 	nx = x + dx[d];
@@ -37,20 +36,22 @@ void wind(int& y, int& x, int& d) {
 	arr[y][x] = 0;
 }
 
-void tonado() {
-	int y = n / 2, x = n / 2;
-	int d = 0, move = 1;
+void move() {
+	int y = n / 2;
+	int x = n / 2;
+	int d = 0;
+	int loop = 1;
 	while (true) {
 		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < move; j++) {
+			for (int j = 0; j < loop; j++) {
 				y += dy[d];
 				x += dx[d];
-				if (x == -1) return;
-				wind(y, x, d);
+				if (x < 0) return;
+				spread(y, x, d);
 			}
 			d = (d + 1) % 4;
 		}
-		move++;
+		loop++;
 	}
 }
 
@@ -59,7 +60,7 @@ int main() {
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
 			scanf(" %d", &arr[i][j]);
-	tonado();
+	move();
 	printf("%d\n", res);
 	return 0;
 }
