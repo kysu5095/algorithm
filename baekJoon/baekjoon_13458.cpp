@@ -2,22 +2,22 @@
 
 #include <stdio.h>
 #define ll long long
+
+int n, B, C;
 int arr[1000001];
 
 int main() {
-	int n;
-	ll master = 0, slave = 0;
 	scanf("%d", &n);
 	for (int i = 0; i < n; i++) scanf(" %d", &arr[i]);
-	int b, c;
-	scanf(" %d %d", &b, &c);
+	scanf(" %d %d", &B, &C);
+	ll ret = 0;
 	for (int i = 0; i < n; i++) {
-		arr[i] -= b;
-		master++;
+		ret += 1;
+		arr[i] -= B;
 		if (arr[i] <= 0) continue;
-		if (arr[i] % c > 0) slave += arr[i] / c + 1;
-		else slave += arr[i] / c;
+		if (arr[i] % C) ret += (arr[i] / C) + 1;
+		else ret += (arr[i] / C);
 	}
-	printf("%lld\n", master + slave);
+	printf("%lld\n", ret);
 	return 0;
 }
