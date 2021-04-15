@@ -1,50 +1,57 @@
 // 사장님 달려가고 있습니다
 
-#include <iostream>
+#include <stdio.h>
 #include <queue>
 
 using namespace std;
 
 int n;
 int arr[101][101];
-bool visited[101][101][4][17];
+bool visited[101][101][4][15];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
 
+struct Point {
+	int y, x, d, s;
+};
+
 int bfs() {
-	queue<pair<pair<int, int>, pair<int, int>>> q;
+	queue<Point> q;
 	for (int i = 0; i < 4; i++) {
-		q.push(make_pair(make_pair(0, 0), make_pair(i, 0)));
+		q.push({ 0, 0, i, 0 });
 		visited[0][0][i][0] = true;
 	}
-	int y, x, ny, nx, d, s, len, t = 0;
+	int y, x, ny, nx, d, s, ns, len, t = 0;
 	while (!q.empty()) {
 		len = q.size();
 		while (len--) {
-			y = q.front().first.first;
-			x = q.front().first.second;
-			d = q.front().second.first;
-			s = q.front().second.second;
+			y = q.front().y;
+			x = q.front().x;
+			d = q.front().d;
+			s = q.front().s;
 			q.pop();
 			if (y == n - 1 && x == n - 1) return t;
+
 			for (int i = 0; i < 4; i++) {
-				ny = y, nx = x;
+				if (i == d) ns = s + 1;
+				else ns = 1;
 				bool flag = false;
-				int next_s = (i == d) ? s + 1 : 1;
-				for (int j = 1; j <= next_s; j++) {
+
+				ny = y;
+				nx = x;
+				for (int ss = 0; ss < ns; ss++) {
 					ny += dy[i];
 					nx += dx[i];
 					if (ny < 0 || ny == n || nx < 0 || nx == n) break;
 					if (arr[ny][nx]) {
-						if (t >= arr[ny][nx]) break;
-						if (j == next_s && t + 1 == arr[ny][nx]) break;
+						if (arr[ny][nx] <= t) break;
+						if (ss == ns - 1 && arr[ny][nx] <= t + 1) break;
 					}
-					if (j == next_s) flag = true;
+					if (ss == ns - 1) flag = true;
 				}
-				if (flag) {
-					if (visited[ny][nx][i][next_s]) continue;
-					q.push(make_pair(make_pair(ny, nx), make_pair(i, next_s)));
-					visited[ny][nx][i][next_s] = true;
+				if (flag && !visited[ny][nx][i][ns]) {
+					q.push({ ny, nx, i, ns });
+					visited[ny][nx][i][ns] = true;
 				}
 			}
 		}
@@ -54,14 +61,12 @@ int bfs() {
 }
 
 int main() {
-	cin.sync_with_stdio(0);
-	cin.tie(0);
-	cin >> n;
+	scanf("%d", &n);
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
-			cin >> arr[i][j];
-	int res = bfs();
-	if (res == -1) cout << "Fired\n";
-	else cout << res << '\n';
+			scanf(" %d", &arr[i][j]);
+	int ret = bfs();
+	if (ret == -1) printf("Fired\n");
+	else printf("%d\n", ret);
 	return 0;
 }
