@@ -1,165 +1,137 @@
 // 더 푸르게
 
 #include <iostream>
-#include <algorithm>
-#include <limits.h>
 #include <string>
 #include <vector>
 
 using namespace std;
 
-int w, h, res;
+int w, h, ret;
 char arr[11][11];
-int dy[3][8] = { {0, 0, 1, -1}, 
-			     {-1, -1, 1, 1 }, 
-			     {-1, -2, -2, -1, 1, 2, 2, 1} };
-int dx[3][8] = { {1, -1, 0, 0 }, 
-				 {-1, 1, 1, -1}, 
-				 {-2, -1, 1, 2, 2, 1, -1, -2} };
-vector<pair<int, int>> v;
+struct Point {
+	int y, x;
+	char ch;
+};
+vector<Point> v;
 
-bool King(int y, int x) {
-	int ny, nx;
-	for (int i = 0; i < 4; i++) {
-		ny = y + dy[0][i];
-		nx = x + dx[0][i];
-		if (ny < 0 || ny == h || nx < 0 || nx == w) continue;
-		if (arr[ny][nx] != 'E') return false;
-	}
-	for (int i = 0; i < 4; i++) {
-		ny = y + dy[1][i];
-		nx = x + dx[1][i];
-		if (ny < 0 || ny == h || nx < 0 || nx == w) continue;
-		if (arr[ny][nx] != 'E') return false;
-	}
-	return true;
-}
+int dKingy[8] = { 0, 0, 1, -1, -1, -1, 1, 1 };
+int dKingx[8] = { 1, -1, 0, 0, -1, 1, -1, 1 };
+int dQueeny[8] = { 0, 0, 1, -1, -1, -1, 1, 1 };
+int dQueenx[8] = { 1, -1, 0, 0, -1, 1, -1, 1 };
+int dBishopy[4] = { -1, -1, 1, 1 };
+int dBishopx[4] = { -1, 1, -1, 1 };
+int dRooky[4] = { 0 ,0 ,1, -1 };
+int dRookx[4] = { 1, -1, 0, 0 };
+int dKnighty[8] = { -1, -2, -2, -1, 1, 2, 2, 1 };
+int dKnightx[8] = { -2, -1, 1, 2, 2, 1, -1, -2 };
 
-bool Queen(int y, int x) {
-	int ny, nx;
-	for (int i = 0; i < 4; i++) {
-		ny = y, nx = x;
-		while (true) {
-			ny += dy[0][i];
-			nx += dx[0][i];
-			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
-			if (arr[ny][nx] != 'E') return false;
-		}
-	}
-	for (int i = 0; i < 4; i++) {
-		ny = y, nx = x;
-		while (true) {
-			ny += dy[1][i];
-			nx += dx[1][i];
-			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
-			if (arr[ny][nx] != 'E') return false;
-		}
-	}
-	return true;
-}
-
-bool Rook(int y, int x) {
-	int ny, nx;
-	for (int i = 0; i < 4; i++) {
-		ny = y, nx = x;
-		while (true) {
-			ny += dy[0][i];
-			nx += dx[0][i];
-			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
-			if (arr[ny][nx] != 'E') return false;
-		}
-	}
-	return true;
-}
-
-bool Bishop(int y, int x) {
-	int ny, nx;
-	for (int i = 0; i < 4; i++) {
-		ny = y, nx = x;
-		while (true) {
-			ny += dy[1][i];
-			nx += dx[1][i];
-			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
-			if (arr[ny][nx] != 'E') return false;
-		}
-	}
-	return true;
-}
-
-bool Knight(int y, int x) {
-	int ny, nx;
+void King(int y, int x, bool& flag) {
 	for (int i = 0; i < 8; i++) {
-		ny = y + dy[2][i];
-		nx = x + dx[2][i];
-		if (ny < 0 || ny >= h || nx < 0 || nx >= w) continue;
-		if (arr[ny][nx] != 'E') return false;
+		int ny = y + dKingy[i];
+		int nx = x + dKingx[i];
+		if (ny < 0 || ny == h || nx < 0 || nx == w) continue;
+		if (arr[ny][nx] != 'E') return;
 	}
-	return true;
+	flag = true;
+}
+
+void Queen(int y, int x, bool& flag) {
+	for (int i = 0; i < 8; i++) {
+		int ny = y;
+		int nx = x;
+		while (true) {
+			ny += dQueeny[i];
+			nx += dQueenx[i];
+			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
+			if (arr[ny][nx] != 'E') return;
+		}
+	}
+	flag = true;
+}
+
+void Bishop(int y, int x, bool& flag) {
+	for (int i = 0; i < 4; i++) {
+		int ny = y;
+		int nx = x;
+		while (true) {
+			ny += dBishopy[i];
+			nx += dBishopx[i];
+			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
+			if (arr[ny][nx] != 'E') return;
+		}
+	}
+	flag = true;
+}
+
+void Rook(int y, int x, bool& flag) {
+	for (int i = 0; i < 4; i++) {
+		int ny = y;
+		int nx = x;
+		while (true) {
+			ny += dRooky[i];
+			nx += dRookx[i];
+			if (ny < 0 || ny == h || nx < 0 || nx == w) break;
+			if (arr[ny][nx] != 'E') return;
+		}
+	}
+	flag = true;
+}
+
+void Knight(int y, int x, bool& flag) {
+	for (int i = 0; i < 8; i++) {
+		int ny = y + dKnighty[i];
+		int nx = x + dKnightx[i];
+		if (ny < 0 || ny >= h || nx < 0 || nx >= w) continue;
+		if (arr[ny][nx] != 'E') return;
+	}
+	flag = true;
 }
 
 bool promising() {
-	int y, x;
-	bool flag;
-	for (int i = 0; i < v.size(); i++) {
-		y = v[i].first;
-		x = v[i].second;
-		if (arr[y][x] == 'E') continue;
-		switch (arr[y][x])
+	for (auto& it : v) {
+		if (arr[it.y][it.x] == 'E') continue;
+		bool flag = false;
+		switch (it.ch)
 		{
-		case 'K':
-			flag = King(y, x);
-			break;
-		case 'Q':
-			flag = Queen(y, x);
-			break;
-		case 'R':
-			flag = Rook(y, x);
-			break;
-		case 'B':
-			flag = Bishop(y, x);
-			break;
-		case 'N':
-			flag = Knight(y, x);
-			break;
+		case 'K': King(it.y, it.x, flag); break;
+		case 'Q': Queen(it.y, it.x, flag);  break;
+		case 'B': Bishop(it.y, it.x, flag);  break;
+		case 'R': Rook(it.y, it.x, flag);  break;
+		case 'N': Knight(it.y, it.x, flag);  break;
 		}
 		if (!flag) return false;
 	}
 	return true;
 }
 
-void removePieces(int idx, int del) {
-	if (del >= res) return;
+void dfs(int idx, int del) {
+	if (del >= ret) return;
 	if (idx == v.size()) {
-		if (promising()) res = del;
+		if (promising()) ret = del;
 		return;
 	}
-	int y = v[idx].first;
-	int x = v[idx].second;
-	char ch = arr[y][x];
-	arr[y][x] = 'E';
-	removePieces(idx + 1, del + 1);
-	arr[y][x] = ch;
-	removePieces(idx + 1, del);
+	dfs(idx + 1, del);
+	arr[v[idx].y][v[idx].x] = 'E';
+	dfs(idx + 1, del + 1);
+	arr[v[idx].y][v[idx].x] = v[idx].ch;
 }
 
 int main() {
-	cin.sync_with_stdio(0);
-	cin.tie(0);
-	string start, end;
-	while (cin >> start) {
-		res = INT_MAX;
+	string str;
+	while (cin >> str) {
+		ret = 16;
 		v.clear();
 		cin >> w >> h;
 		for (int i = 0; i < h; i++) {
 			for (int j = 0; j < w; j++) {
 				cin >> arr[i][j];
-				if (arr[i][j] != 'E')
-					v.push_back(make_pair(i, j));
+				if (arr[i][j] != 'E') v.push_back({ i, j, arr[i][j] });
 			}
 		}
-		removePieces(0, 0);
-		cout << "Minimum Number of Pieces to be removed: " << res << '\n';
-		cin >> end;
+
+		dfs(0, 0);
+		cout << "Minimum Number of Pieces to be removed: " << ret << '\n';
+		cin >> str;
 	}
 	return 0;
 }
