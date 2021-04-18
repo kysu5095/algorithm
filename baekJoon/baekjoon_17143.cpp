@@ -1,91 +1,82 @@
 // 낚시왕
 
 #include <stdio.h>
-#include <queue>
-#include <vector>
-#include <algorithm>
 #include <string.h>
+#include <algorithm>
+#include <vector>
 
 using namespace std;
 
-int r, c, m;
+int r, c, M, ret = 0;
 int arr[101][101], tmp[101][101];
 int dy[4] = { -1, 1, 0, 0 };
 int dx[4] = { 0, 0, 1, -1 };
-
-struct SHARK {
+struct Point {
 	bool die;
 	int y, x, s, d, z;
 };
-vector<SHARK> v;
+vector<Point> v;
+
+void catch_shark(int j) {
+	for (int i = 0; i < r; i++) {
+		if (arr[i][j]) {
+			v[arr[i][j] - 1].die = true;
+			ret += v[arr[i][j] - 1].z;
+			arr[i][j] = 0;
+			break;
+		}
+	}
+}
 
 void move_shark() {
-	memset(tmp, -1, sizeof(tmp));
-	for (int idx = 0; idx < m; idx++) {
-		if (v[idx].die) continue;
-		int y = v[idx].y;
-		int x = v[idx].x;
-		int s = v[idx].s;
-		int d = v[idx].d;
+	memset(tmp, 0, sizeof(tmp));
+	for (int i = 0; i < M; i++) {
+		if (v[i].die) continue;
+		int& y = v[i].y;
+		int& x = v[i].x;
+		int& d = v[i].d;
+		int s = v[i].s;
+		arr[y][x] = 0;
 
-		if (d < 2) s %= (2 * (r - 1));
-		else s %= (2 * (c - 1));
-
-		for (int i = 0; i < s; i++) {
+		for (int ss = 0; ss < s; ss++) {
 			y += dy[d];
 			x += dx[d];
 			if (y < 0 || y == r || x < 0 || x == c) {
-				if (d % 2) d--;
-				else d++;
-				y += (dy[d] * 2);
-				x += (dx[d] * 2);
+				if (d % 2 == 0) d++;
+				else d--;
+				y += dy[d] * 2;
+				x += dx[d] * 2;
 			}
 		}
-		if (tmp[y][x] >= 0) {
-			v[idx].die = true;
-			continue;
-		}
-		tmp[y][x] = idx;
-		v[idx].y = y;
-		v[idx].x = x;
-		v[idx].d = d;
+		if (tmp[y][x]) v[i].die = true;
+		else tmp[y][x] = i + 1;
 	}
 
-	for (int i = 0; i < r; i++)
-		for (int j = 0; j < c; j++)
-			arr[i][j] = tmp[i][j];
-}
-
-int catch_shark() {
-	int ret = 0;
-	for (int x = 0; x < c; x++) {
-		for (int y = 0; y < r; y++) {
-			if (arr[y][x] >= 0) {
-				ret += v[arr[y][x]].z;
-				v[arr[y][x]].die = true;
-				arr[y][x] = -1;
-				break;
-			}
-		}
-		move_shark();
+	for (int i = 0; i < M; i++) {
+		if (v[i].die) continue;
+		int y = v[i].y;
+		int x = v[i].x;
+		arr[y][x] = i + 1;
 	}
-	return ret;
 }
 
 int main() {
-	scanf("%d %d %d", &r, &c, &m);
-	v.resize(m);
-	memset(arr, -1, sizeof(arr));
-	for (int i = 0; i < m; i++) {
+	scanf("%d %d %d", &r, &c, &M);
+	for (int i = 0; i < M; i++) {
 		int y, x, s, d, z;
 		scanf(" %d %d %d %d %d", &y, &x, &s, &d, &z);
-		v[i] = { false, y - 1, x - 1, s, d - 1, z };
+		if (d <= 2) v.push_back({ false, y - 1, x - 1, s % (2 * (r - 1)), d - 1, z });
+		else v.push_back({ false, y - 1,x - 1,s % (2 * (c - 1)), d - 1, z });
 	}
-	sort(v.begin(), v.end(), [](SHARK& s1, SHARK& s2) {
-		return s1.z > s2.z;
+	sort(v.begin(), v.end(), [](Point& a, Point& b) {
+		return a.z > b.z;
 	});
-	for (int i = 0; i < m; i++) arr[v[i].y][v[i].x] = i;
+	for (int i = 0; i < M; i++) arr[v[i].y][v[i].x] = i + 1;
 
-	printf("%d\n", catch_shark());
+	for (int j = 0; j < c; j++) {
+		catch_shark(j);
+		move_shark();
+	}
+	printf("%d\n", ret);
 	return 0;
 }
