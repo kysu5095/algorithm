@@ -1,118 +1,111 @@
 // 모노미노도미노 2
 
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 
-using namespace std;
+int n, total = 0;
+int arr[2][6][4];
 
-int n, total = 0, total_cnt = 0;
-int arr[2][6][4]; // 0: green, 1: blue
+void down_1by1(int x, int idx) {
+	for (int y = 1; y < 5; y++) {
+		if (arr[idx][y + 1][x]) {
+			arr[idx][y][x] = 1;
+			return;
+		}
+	}
+	arr[idx][5][x] = 1;
+}
 
-void is_overflow() {
-	for (int idx = 0; idx < 2; idx++) {
-		int down_cnt = 0;
-		for (int y = 0; y < 2; y++) {
+void down_1by2(int x, int idx) {
+	for (int y = 1; y < 5; y++) {
+		if (arr[idx][y + 1][x] || arr[idx][y + 1][x + 1]) {
+			arr[idx][y][x] = 1;
+			arr[idx][y][x + 1] = 1;
+			return;
+		}
+	}
+	arr[idx][5][x] = 1;
+	arr[idx][5][x + 1] = 1;
+}
+
+void down_2by1(int x, int idx) {
+	for (int y = 1; y < 5; y++) {
+		if (arr[idx][y + 1][x]) {
+			arr[idx][y][x] = 1;
+			arr[idx][y - 1][x] = 1;
+			return;
+		}
+	}
+	arr[idx][5][x] = 1;
+	arr[idx][4][x] = 1;
+}
+
+void down_arr(int _y, int idx) {
+	for (int y = _y - 1; y >= 0; y--)
+		for (int x = 0; x < 4; x++)
+			arr[idx][y + 1][x] = arr[idx][y][x];
+	for (int x = 0; x < 4; x++)
+		arr[idx][0][x] = 0;
+}
+
+void is_full(int idx) {
+	bool flag = true;
+	while (flag) {
+		flag = false;
+		for (int y = 5; y >= 2; y--) {
+			int cnt = 0;
 			for (int x = 0; x < 4; x++) {
-				if (arr[idx][y][x]) {
-					down_cnt++;
-					break;
-				}
+				if (arr[idx][y][x]) cnt++;
+				else break;
 			}
-		}
-		if (!down_cnt) continue;
-
-		for (int y = 5 - down_cnt; y >= 0; y--) {
-			for (int x = 0; x < 4; x++) {
-				arr[idx][y + down_cnt][x] = arr[idx][y][x];
-				arr[idx][y][x] = 0;
+			if (cnt == 4) {
+				down_arr(y, idx);
+				total++;
+				flag = true;
+				break;
 			}
 		}
 	}
 }
 
-void is_full() {
-	for (int idx = 0; idx < 2; idx++) {
-		for (int y = 5; y > 1; y--) {
-			int block_cnt = 0;
-			for (int x = 0; x < 4; x++)
-				if (arr[idx][y][x]) block_cnt++;
-
-			if (block_cnt != 4) continue;
-			for (int _y = y - 1; _y >= 0; _y--) {
-				for (int _x = 0; _x < 4; _x++) {
-					arr[idx][_y + 1][_x] = arr[idx][_y][_x];
-					arr[idx][_y][_x] = 0;
-				}
-			}
-			y++;
-			total++;
-		}
+void is_over(int idx) {
+	for (int i = 0; i < 2; i++) {
+		for (int x = 0; x < 4; x++)
+			if (arr[idx][1][x])
+				down_arr(5, idx);
 	}
 }
 
-void put_1by1(int& x, int idx) {
-	int y = 0;
-	while (true) {
-		if (y == 6 || arr[idx][y][x]) {
-			arr[idx][y - 1][x] = 1;
-			break;
-		}
-		y++;
-	}
-}
-
-void put_1by2(int& x, int idx) {
-	int y = 0, xx = x + 1;
-	while (true) {
-		if (y == 6 || arr[idx][y][x] || arr[idx][y][xx]) {
-			arr[idx][y - 1][x] = 1;
-			arr[idx][y - 1][xx] = 1;
-			break;
-		}
-		y++;
-	}
-}
-
-void put_2by1(int& x, int idx) {
-	int y = 0;
-	while (true) {
-		if (y == 6 || arr[idx][y][x]) {
-			arr[idx][y - 2][x] = 1;
-			arr[idx][y - 1][x] = 1;
-			break;
-		}
-		y++;
-	}
+void get_score(int& score, int idx) {
+	for (int y = 2; y < 6; y++)
+		for (int x = 0; x < 4; x++)
+			if (arr[idx][y][x]) score++;
 }
 
 int main() {
 	scanf("%d", &n);
-	for (int i = 0; i < n; i++) {
-		int type, y, x;
-		scanf(" %d %d %d", &type, &y, &x);
-		switch (type)
-		{
-		case 1:
-			put_1by1(x, 0);
-			put_1by1(y, 1);
-			break;
-		case 2:
-			put_1by2(x, 0);
-			put_2by1(y, 1);
-			break;
-		case 3:
-			put_2by1(x, 0);
-			put_1by2(y, 1);
-			break;
+	while (n--) {
+		int t, x, y;
+		scanf(" %d %d %d", &t, &y, &x);
+		if (t == 1) {
+			down_1by1(x, 0);
+			down_1by1(y, 1);
 		}
-		is_full();
-		is_overflow();
+		else if (t == 2) {
+			down_1by2(x, 0);
+			down_2by1(y, 1);
+		}
+		else {
+			down_2by1(x, 0);
+			down_1by2(y, 1);
+		}
+		is_full(0);
+		is_full(1);
+		is_over(0);
+		is_over(1);
 	}
-	for (int idx = 0; idx < 2; idx++) 
-		for (int y = 2; y < 6; y++)
-			for (int x = 0; x < 4; x++)
-				if (arr[idx][y][x])
-					total_cnt++;
-	printf("%d\n%d\n", total, total_cnt);
+	int green = 0, blue = 0;
+	get_score(green, 0);
+	get_score(blue, 1);
+	printf("%d\n%d\n", total, blue + green);
 	return 0;
 }
