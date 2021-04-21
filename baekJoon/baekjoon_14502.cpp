@@ -1,27 +1,28 @@
 // 연구소
 
 #include <stdio.h>
-#include <string.h>
+#include <vector>
 #include <queue>
+#include <string.h>
 
 using namespace std;
 
-int n, m, cnt = 0, res = 0;
+int n, m, _cnt = 0, ret = 0;
 int arr[9][9];
 bool visited[9][9];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
-vector<pair<int, int>> v;
+vector<pair<int, int>> v,virus;
 
-void bfs() {
+int bfs() {
+	int y, x, ny, nx, cnt = _cnt;
 	memset(visited, false, sizeof(visited));
 	queue<pair<int, int>> q;
-	for (auto& it : v) {
-		q.push(make_pair(it.first, it.second));
+	for (auto& it : virus) {
+		q.push(it);
 		visited[it.first][it.second] = true;
 	}
-	int y, x, ny, nx, emt = cnt;
-	while (!q.empty() && emt) {
+	while (!q.empty()) {
 		y = q.front().first;
 		x = q.front().second;
 		q.pop();
@@ -29,33 +30,25 @@ void bfs() {
 			ny = y + dy[i];
 			nx = x + dx[i];
 			if (ny < 0 || ny == n || nx < 0 || nx == m || visited[ny][nx] || arr[ny][nx] == 1) continue;
-			if (arr[ny][nx] == 0) emt--;
-			if (emt <= res) return;
+			if (arr[ny][nx] == 0) cnt--;
 			q.push(make_pair(ny, nx));
 			visited[ny][nx] = true;
 		}
 	}
-	res = res < emt ? emt : res;
+	return cnt;
 }
 
-void dfs(int y, int x, int cnt) {
+void dfs(int idx, int cnt) {
 	if (cnt == 3) {
-		bfs();
+		int val = bfs();
+		ret = ret < val ? val : ret;
 		return;
 	}
-	if (y == n) return;
-	if (x == m) {
-		dfs(y + 1, 0, cnt);
-		return;
+	for (int i = idx; i < v.size(); i++) {
+		arr[v[i].first][v[i].second] = 1;
+		dfs(i + 1, cnt + 1);
+		arr[v[i].first][v[i].second] = 0;
 	}
-	if (arr[y][x] == 1 || arr[y][x] == 2) {
-		dfs(y, x + 1, cnt);
-		return;
-	}
-	arr[y][x] = 1;
-	dfs(y, x + 1, cnt + 1);
-	arr[y][x] = 0;
-	dfs(y, x + 1, cnt);
 }
 
 int main() {
@@ -63,12 +56,12 @@ int main() {
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < m; j++) {
 			scanf(" %d", &arr[i][j]);
-			if (arr[i][j] == 2) v.push_back(make_pair(i, j));
-			else if (arr[i][j] == 0) cnt++;
+			if (arr[i][j] == 0) _cnt++, v.push_back(make_pair(i, j));
+			else if (arr[i][j] == 2) virus.push_back(make_pair(i, j));
 		}
 	}
-	cnt -= 3;
-	dfs(0, 0, 0);
-	printf("%d\n", res);
+	_cnt -= 3;
+	dfs(0, 0);
+	printf("%d\n", ret);
 	return 0;
 }
