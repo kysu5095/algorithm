@@ -1,11 +1,11 @@
 // 스타트 택시
 
 #include <stdio.h>
-#include <string.h>
-#include <vector>
-#include <queue>
-#include <algorithm>
 #include <map>
+#include <queue>
+#include <vector>
+#include <algorithm>
+#include <string.h>
 
 using namespace std;
 
@@ -14,103 +14,84 @@ int arr[21][21];
 bool visited[21][21];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
-map<pair<int, int>, pair<int, int>> m;
-vector<pair<int, int>> v;
-queue<pair<int, int>> q;
+map<int, pair<int, int>> m;
 
-void init() {
-	while (!q.empty()) q.pop();
-	v.clear();
+bool find_customer(int& y, int& x) {
 	memset(visited, false, sizeof(visited));
-}
-
-bool find_customer(int& y, int& x, int& k) {
+	vector<pair<int, int>> v;
+	queue<pair<int, int>> q;
+	q.push(make_pair(y, x));
+	visited[y][x] = true;
 	int ny, nx, len;
-	init();
-	q.push(make_pair(y, x));
-	visited[y][x] = true;
 
-	while (!q.empty() && k) {
+	while (!q.empty()) {
 		len = q.size();
 		while (len--) {
 			y = q.front().first;
 			x = q.front().second;
 			q.pop();
-
-			if (m.count(make_pair(y, x))) v.push_back(make_pair(y, x));
-			else {
-				for (int i = 0; i < 4; i++) {
-					ny = y + dy[i];
-					nx = x + dx[i];
-					if (ny < 0 || ny == n || nx < 0 || nx == n || arr[ny][nx] || visited[ny][nx]) continue;
-					q.push(make_pair(ny, nx));
-					visited[ny][nx] = true;
-				}
-			}
-		}
-		if (v.size()) break;
-		k--;
-	}
-
-	if (v.empty()) {
-		k = -1;
-		return false;
-	}
-	return true;
-}
-
-bool find_destination(int& y, int& x, int& k) {
-	int sy = y, sx = x;
-	int ny, nx, len, distance = 0;
-	init();
-	q.push(make_pair(y, x));
-	visited[y][x] = true;
-
-	while (!q.empty() && k) {
-		k--;
-		distance++;
-		len = q.size();
-		while (len--) {
-			y = q.front().first;
-			x = q.front().second;
-			q.pop();
+			if (arr[y][x] >= 2)	v.push_back(make_pair(y, x));
 			for (int i = 0; i < 4; i++) {
 				ny = y + dy[i];
 				nx = x + dx[i];
-				if (ny < 0 || ny == n || nx < 0 || nx == n || arr[ny][nx] || visited[ny][nx]) continue;
-				if (m[make_pair(sy, sx)] == make_pair(ny, nx)) {
-					y = ny;
-					x = nx;
-					k += distance * 2;
-					m.erase(make_pair(sy, sx));
-					return true;
-				}
+				if (ny < 0 || ny == n || nx < 0 || nx == n || visited[ny][nx] || arr[ny][nx] == 1) continue;
 				q.push(make_pair(ny, nx));
 				visited[ny][nx] = true;
 			}
 		}
+		if (v.size()) {
+			sort(v.begin(), v.end());
+			y = v[0].first;
+			x = v[0].second;
+			return true;
+		}
+		if (k == 0) return false;
+		k--;
 	}
-
-	k = -1;
 	return false;
 }
 
-void taxi(int y, int x) {
-	int ny, nx, len, distance;
-	while (true) {
-		if (!find_customer(y, x, k)) break;
-		sort(v.begin(), v.end(), [](pair<int, int>& p1, pair<int, int>& p2) {
-			if (p1.first < p2.first) return true;
-			else if(p1.first == p2.first) {
-				if (p1.second < p2.second) return true;
-				else return false;
+bool find_departure(int& y, int& x) {
+	memset(visited, false, sizeof(visited));
+	queue<pair<int, int>> q;
+	q.push(make_pair(y, x));
+	visited[y][x] = true;
+	int key = arr[y][x];
+	arr[y][x] = 0;
+	int ny, nx, len, fuel = 0, fy = m[key].first, fx = m[key].second;
+
+	while (!q.empty()) {
+		len = q.size();
+		while (len--) {
+			y = q.front().first;
+			x = q.front().second;
+			q.pop();
+			if (y == fy && x == fx) {
+				k += fuel * 2;
+				m.erase(key);
+				return true;
 			}
-			else return false;
-		});
-		y = v[0].first, x = v[0].second;
-		if (!find_destination(y, x, k)) break;
-		if (m.empty()) break;
+			for (int i = 0; i < 4; i++) {
+				ny = y + dy[i];
+				nx = x + dx[i];
+				if (ny < 0 || ny == n || nx < 0 || nx == n || visited[ny][nx] || arr[ny][nx] == 1) continue;
+				q.push(make_pair(ny, nx));
+				visited[ny][nx] = true;
+			}
+		}
+		if (k == 0) return false;
+		k--;
+		fuel++;
 	}
+	return false;
+}
+
+int move(int y, int x) {
+	while (m.size()) {
+		if (!find_customer(y, x)) return -1;
+		if (!find_departure(y, x)) return -1;
+	}
+	return k;
 }
 
 int main() {
@@ -118,14 +99,14 @@ int main() {
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < n; j++)
 			scanf(" %d", &arr[i][j]);
-	int y, x;
-	scanf(" %d %d", &y, &x);
-	for (int i = 0; i < M; i++) {
-		int y1, x1, y2, x2;
-		scanf(" %d %d %d %d", &y1, &x1, &y2, &x2);
-		m[make_pair(y1 - 1, x1 - 1)] = make_pair(y2 - 1, x2 - 1);
+	int sy, sx;
+	scanf(" %d %d", &sy, &sx);
+	for (int i = 2; i < M + 2; i++) {
+		int y, x, yy, xx;
+		scanf(" %d %d %d %d", &y, &x, &yy, &xx);
+		arr[y - 1][x - 1] = i;
+		m[i] = make_pair(yy - 1, xx - 1);
 	}
-	taxi(y - 1, x - 1);
-	printf("%d\n", k);
+	printf("%d\n", move(sy - 1, sx - 1));
 	return 0;
 }
