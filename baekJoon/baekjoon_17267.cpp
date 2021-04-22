@@ -1,83 +1,89 @@
 // 상남자
 
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include <algorithm>
 #include <queue>
 
 using namespace std;
 
-int n, m, L, R;
-int arr[1001][1001];
-bool visited[1001][1001] = { {false,}, };
+int n, m, cnt = 1;
+char arr[1001][1001];
 int dy[4] = { 0, 0, 1, -1 };
 int dx[4] = { 1, -1, 0, 0 };
+struct Point {
+	int y, x, L, R;
+};
 
-int return_cnt(int _y, int& x, int l, int r, queue<pair<pair<int, int>, pair<int, int>>>& q) {
-	q.push(make_pair(make_pair(_y, x), make_pair(l, r)));
-	int cnt = 1;
-	int y = _y + dy[2];
-	while (true) {
-		if (y == n) break;
-		if (arr[y][x] == 1) break;
-		visited[y][x] = true;
-		q.push(make_pair(make_pair(y, x), make_pair(l, r)));
-		y += dy[2];
-		cnt++;
-	}
-	y = _y + dy[3];
-	while (true) {
-		if (y == -1) break;
-		if (arr[y][x] == 1) break;
-		visited[y][x] = true;
-		q.push(make_pair(make_pair(y, x), make_pair(l, r)));
-		y += dy[3];
-		cnt++;
-	}
-
-	return cnt;
+void check_left(int y, int x, int L, int R, queue<Point>& q) {
+	x += dx[1];
+	if (x < 0 || arr[y][x] == '1') return;
+	L--;
+	q.push({ y, x, L, R });
+	arr[y][x] = '1';
+	cnt++;
 }
 
-int bfs(int _y, int _x) {
-	queue<pair<pair<int, int>, pair<int, int>>> q;
-	visited[_y][_x] = true;
-	int cnt = return_cnt(_y, _x, L, R, q);
-	int y, x, ny, nx, l, r;
+void check_right(int y, int x, int L, int R, queue<Point>& q) {
+	x += dx[0];
+	if (x == m || arr[y][x] == '1') return;
+	R--;
+	q.push({ y, x, L, R });
+	arr[y][x] = '1';
+	cnt++;
+}
+
+void bfs(int y, int x, int L, int R) {
+	int ny, nx, nL, nR, len;
+	queue<Point> q;
+	q.push({ y, x, L, R });
+	arr[y][x] = '1';
 	while (!q.empty()) {
-		y = q.front().first.first;
-		x = q.front().first.second;
-		l = q.front().second.first;
-		r = q.front().second.second;
-		q.pop();
-		if (l != 0) {
-			nx = x + dx[1];
-			if (!(arr[y][nx] == 1 || visited[y][nx] || nx < 0 || nx == m)) {
-				visited[y][nx] = true;
-				cnt += return_cnt(y, nx, l - 1, r, q);
+		len = q.size();
+		while (len--) {
+			y = q.front().y;
+			x = q.front().x;
+			L = q.front().L;
+			R = q.front().R;
+			q.pop();
+
+			if (L) check_left(y, x, L, R, q);
+			if (R) check_right(y, x, L, R, q);
+
+			ny = y;
+			while (true) {
+				ny += dy[3];
+				if (ny < 0 || arr[ny][x] == '1') break;
+				q.push({ ny, x, L, R });
+				arr[ny][x] = '1';
+				cnt++;
+
+				if (L) check_left(ny, x, L, R, q);
+				if (R) check_right(ny, x, L, R, q);
 			}
-		}
-		if (r != 0) {
-			nx = x + dx[0];
-			if (!(arr[y][nx] == 1 || visited[y][nx] || nx < 0 || nx == m)) {
-				visited[y][nx] = true;
-				cnt += return_cnt(y, nx, l, r - 1, q);
+			ny = y;
+			while (true) {
+				ny += dy[2];
+				if (ny == n || arr[ny][x] == '1') break;
+				q.push({ ny, x, L, R });
+				arr[ny][x] = '1';
+				cnt++;
+
+				if (L) check_left(ny, x, L, R, q);
+				if (R) check_right(ny, x, L, R, q);
 			}
 		}
 	}
-	return cnt;
 }
 
 int main() {
-	int sy, sx;
-	scanf("%d %d %d %d", &n, &m, &L, &R);
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < m; j++) {
-			scanf(" %1d", &arr[i][j]);
-			if (arr[i][j] == 2) {
-				sy = i;
-				sx = j;
-			}
-		}
-	printf("%d\n", bfs(sy, sx));
+	int y, x, L, R;
+	scanf("%d %d", &n, &m);
+	scanf(" %d %d", &L, &R);
+	for (int i = 0; i < n; i++) {
+		scanf("%s", arr[i]);
+		for (int j = 0; j < m; j++)
+			if (arr[i][j] == '2') y = i, x = j;
+	}
+	bfs(y, x, L, R);
+	printf("%d\n", cnt);
 	return 0;
 }
