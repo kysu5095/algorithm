@@ -1,72 +1,56 @@
 // RBY팡!
 
 #include <iostream>
-#include <algorithm>
-
+#define MAX 10005
 using namespace std;
 
-int n, res;
-int arr[10001];
-int tmp[10001];
+int n, ret = MAX;
+int arr[10005];
 
-void copy_arr() {
-	for (int i = 0; i < n; i++)
-		arr[i] = tmp[i];
-}
-
-void color_change(int& idx, int color) {
-	arr[idx] = color;
-	int up = idx - 1;
-	int down = idx + 1;
-	int ucnt = 0, dcnt = 1, total = n;
+void color_change(int idx) {
+	int l = idx - 1;
+	int r = idx + 1;
+	int lcnt = 1, rcnt = 0, del = 0;
+	int color = arr[idx];
 	while (true) {
-		while (true) {
-			if (up < 0) break;
-			if (arr[up] != -1 && arr[up] != color) break;
-			if (arr[up] == color) ucnt++;
-			up--;
+		while (l > 0) {
+			if (arr[l] != color) break;
+			lcnt++;
+			l--;
 		}
-		up++;
-		while (true) {
-			if (down == n) break;
-			if (arr[down] != -1 && arr[down] != color) break;
-			if (arr[down] == color) dcnt++;
-			down++;
+		while (r <= n) {
+			if (arr[r] != color) break;
+			rcnt++;
+			r++;
 		}
-		down--;
-		if (up == down) break;
-		if (dcnt + ucnt < 4) break;
-		for (int i = up; i <= down; i++)
-			arr[i] = -1;
-		total -= (dcnt + ucnt);
-		if (!total) break;
-		up--;
-		down++;
-		if (up >= 0) color = arr[up];
-		else color = arr[down];
-		ucnt = 0;
-		dcnt = 0;
+		if (lcnt + rcnt < 4) break;
+		del += (lcnt + rcnt);
+		
+		if (arr[l] != arr[r]) break;
+		color = arr[l];
+		lcnt = 0;
+		rcnt = 0;
 	}
-	res = min(res, total);
+	if (del == 0) return;
+	del = n - del;
+	ret = ret > del ? del : ret;
 }
 
 int main() {
 	cin.sync_with_stdio(0);
 	cin.tie(0);
-	int color;
 	cin >> n;
-	for (int i = 0; i < n; i++) {
-		cin >> arr[i];
-		tmp[i] = arr[i];
+	for (int i = 1; i <= n; i++) cin >> arr[i];
+	for (int idx = 1; idx < n - 1; idx++) {
+		for (int j = 1; j <= 3; j++) {
+			if (arr[idx] == j) continue;
+			int color = arr[idx];
+			arr[idx] = j;
+			color_change(idx);
+			arr[idx] = color;
+		}
 	}
-	res = n;
-	for (int i = 0; i < n; i++) {
-		for (int j = 1; j <= 3; j++)
-			if (arr[i] != j) {
-				color_change(i, j);
-				copy_arr();
-			}
-	}
-	cout << res << '\n';
+	if (ret == MAX) ret = n;
+	cout << ret << '\n';
 	return 0;
 }
