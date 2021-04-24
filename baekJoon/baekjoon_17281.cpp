@@ -1,63 +1,67 @@
 // 야구
-// 3:25
 
 #include <iostream>
+#define INIT 7
 
 using namespace std;
 
-int n, res;
-int arr[51][10];
-int turn[9] = { 0, };
+int n, ret = 0;
+int arr[51][9], sequence[9];
+bool visited[9];
 
-void game() {
+int game() {
 	int score = 0;
 	int idx = 0;
-	int base, out, grade;
-
-	for (int i = 0; i < n; i++) {
-		// 0000 | 0000
-		base = 0;
-		out = 0;
-		while (true) {
-			if (out == 3) break;
-			grade = arr[i][turn[idx++] - 1];
-			if (!grade) out++;
-			else {
-				base |= 1;
-				base <<= grade;
-				score += ((base >> 4 & 1) + (base >> 5 & 1) + (base >> 6 & 1) + (base >> 7 & 1));
-				base &= 15;
+	for (int inning = 0; inning < n; inning++) {
+		int out_count = 0;
+		int where_is = 0;
+		while (out_count != 3) {
+			int hit = arr[inning][sequence[idx]];
+			idx = (idx + 1) % 9;
+			if (hit == 0) {
+				out_count++;
+				continue;
 			}
-			if (idx == 9) idx = 0;
+
+			where_is <<= hit;
+			where_is |= (1 << (hit - 1));
+			for (int i = 3; i <= 6; i++) score += ((where_is >> i) & 1);
+			where_is &= INIT;
 		}
 	}
-	res = res < score ? score : res;
+	return score;
 }
 
 void dfs(int cnt) {
-	if (cnt == 10) {
-		game();
+	if (cnt == 9) {
+		int score = game();
+		ret = ret < score ? score : ret;
+		return;
+	}
+	if (cnt == 3) {
+		dfs(cnt + 1);
 		return;
 	}
 	for (int i = 0; i < 9; i++) {
-		if (!turn[i]) {
-			turn[i] = cnt;
+		if (!visited[i]) {
+			visited[i] = true;
+			sequence[cnt] = i;
 			dfs(cnt + 1);
-			turn[i] = 0;
+			visited[i] = false;
 		}
 	}
 }
 
 int main() {
-	ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-	res = 0;
+	cin.sync_with_stdio(0);
+	cin.tie(0);
 	cin >> n;
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < 9; j++)
 			cin >> arr[i][j];
-	turn[3] = 1;
-	dfs(2);
-	cout << res << '\n';
+	sequence[3] = 0;
+	visited[0] = true;
+	dfs(0);
+	cout << ret << '\n';
 	return 0;
 }
